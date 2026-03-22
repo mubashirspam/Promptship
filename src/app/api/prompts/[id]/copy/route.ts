@@ -22,10 +22,12 @@ export async function POST(
     const userId = session.user.id;
 
     // Get user tier
-    const user = await db().query.users.findFirst({
-      where: eq(users.id, userId),
-      columns: { tier: true },
-    });
+    const user = await db()
+      .select({ tier: users.tier })
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1)
+      .then(rows => rows[0]);
     const tier = (user?.tier ?? 'free') as Tier;
     const limit = TIER_LIMITS[tier].promptCopies;
 
@@ -35,7 +37,7 @@ export async function POST(
       startOfMonth.setDate(1);
       startOfMonth.setHours(0, 0, 0, 0);
 
-      const [{ value: copiesThisMonth }] = await db
+      const [{ value: copiesThisMonth }] = await db()
         .select({ value: count() })
         .from(promptCopies)
         .where(
@@ -62,8 +64,8 @@ export async function POST(
 
     // Record copy and increment counter atomically
     await Promise.all([
-      db.insert(promptCopies).values({ userId, promptId: id }),
-      db
+      db().insert(promptCopies).values({ userId, promptId: id }),
+      db()
         .update(prompts)
         .set({ copyCount: sql`${prompts.copyCount} + 1` })
         .where(eq(prompts.id, id)),

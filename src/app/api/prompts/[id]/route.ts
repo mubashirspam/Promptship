@@ -10,7 +10,7 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const prompt = await db
+    const prompt = await db()
       .select()
       .from(prompts)
       .where(eq(prompts.id, id))

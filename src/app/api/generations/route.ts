@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
       conditions.push(eq(generations.framework, framework));
     }
 
-    const items = await db
+    const items = await db()
       .select()
       .from(generations)
       .where(and(...conditions))

@@ -19,12 +19,15 @@ export async function GET(
 
     const { id } = await props.params;
 
-    const generation = await db().query.generations.findFirst({
-      where: and(
+    const generation = await db()
+      .select()
+      .from(generations)
+      .where(and(
         eq(generations.id, id),
         eq(generations.userId, session.user.id)
-      ),
-    });
+      ))
+      .limit(1)
+      .then(rows => rows[0]);
 
     if (!generation) {
       return NextResponse.json(
@@ -58,7 +61,7 @@ export async function DELETE(
 
     const { id } = await props.params;
 
-    const deleted = await db
+    const deleted = await db()
       .delete(generations)
       .where(
         and(

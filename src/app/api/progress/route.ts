@@ -15,7 +15,7 @@ export async function GET() {
       );
     }
 
-    const progress = await db
+    const progress = await db()
       .select()
       .from(lessonProgress)
       .where(eq(lessonProgress.userId, session.user.id));
@@ -49,15 +49,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const existing = await db().query.lessonProgress.findFirst({
-      where: and(
+    const existing = await db()
+      .select()
+      .from(lessonProgress)
+      .where(and(
         eq(lessonProgress.userId, session.user.id),
         eq(lessonProgress.lessonId, lessonId)
-      ),
-    });
+      ))
+      .limit(1)
+      .then(rows => rows[0]);
 
     if (existing) {
-      await db
+      await db()
         .update(lessonProgress)
         .set({
           lastPositionSec: position ?? existing.lastPositionSec,

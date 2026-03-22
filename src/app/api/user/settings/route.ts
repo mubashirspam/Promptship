@@ -15,21 +15,23 @@ export async function GET() {
       );
     }
 
-    const user = await db().query.users.findFirst({
-      where: eq(users.id, session.user.id),
-      columns: {
-        id: true,
-        name: true,
-        email: true,
-        avatarUrl: true,
-        tier: true,
-        credits: true,
-        defaultFramework: true,
-        preferredCurrency: true,
-        onboardingCompleted: true,
-        createdAt: true,
-      },
-    });
+    const user = await db()
+      .select({
+        id: users.id,
+        name: users.name,
+        email: users.email,
+        avatarUrl: users.avatarUrl,
+        tier: users.tier,
+        credits: users.credits,
+        defaultFramework: users.defaultFramework,
+        preferredCurrency: users.preferredCurrency,
+        onboardingCompleted: users.onboardingCompleted,
+        createdAt: users.createdAt,
+      })
+      .from(users)
+      .where(eq(users.id, session.user.id))
+      .limit(1)
+      .then(rows => rows[0]);
 
     if (!user) {
       return NextResponse.json(
@@ -82,7 +84,7 @@ export async function PATCH(request: NextRequest) {
 
     updates.updatedAt = new Date();
 
-    await db
+    await db()
       .update(users)
       .set(updates)
       .where(eq(users.id, session.user.id));
