@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 import { AuthCard } from '@/components/auth/auth-card';
 import { VerifyContent } from './verify-content';
 
@@ -12,7 +13,9 @@ export default function VerifyPage() {
       title="Check your email"
       description="We sent you a magic link to sign in"
     >
-      <VerifyContent />
+      <Suspense fallback={<div>Loading...</div>}>
+        <VerifyContent />
+      </Suspense>
     </AuthCard>
   );
 }

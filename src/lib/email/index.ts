@@ -1,6 +1,11 @@
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+function getResendClient() {
+  if (!process.env.RESEND_API_KEY) {
+    throw new Error('Resend API key is not configured');
+  }
+  return new Resend(process.env.RESEND_API_KEY);
+}
 
 const EMAIL_FROM = process.env.EMAIL_FROM || 'PromptShip <hello@promptship.dev>';
 
@@ -11,6 +16,7 @@ export async function sendMagicLinkEmail({
   email: string;
   url: string;
 }) {
+  const resend = getResendClient();
   await resend.emails.send({
     from: EMAIL_FROM,
     to: email,
@@ -31,6 +37,7 @@ export async function sendMagicLinkEmail({
 }
 
 export async function sendWelcomeEmail({ email, name }: { email: string; name?: string }) {
+  const resend = getResendClient();
   await resend.emails.send({
     from: EMAIL_FROM,
     to: email,

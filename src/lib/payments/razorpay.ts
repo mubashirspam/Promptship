@@ -1,10 +1,15 @@
 import Razorpay from 'razorpay';
 import crypto from 'crypto';
 
-export const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID!,
-  key_secret: process.env.RAZORPAY_KEY_SECRET!,
-});
+export function getRazorpayClient() {
+  if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+    throw new Error('Razorpay credentials are not configured');
+  }
+  return new Razorpay({
+    key_id: process.env.RAZORPAY_KEY_ID,
+    key_secret: process.env.RAZORPAY_KEY_SECRET,
+  });
+}
 
 export async function createSubscription({
   planId,
@@ -13,6 +18,7 @@ export async function createSubscription({
   planId: string;
   customerId?: string;
 }) {
+  const razorpay = getRazorpayClient();
   return razorpay.subscriptions.create({
     plan_id: planId,
     total_count: 12,
