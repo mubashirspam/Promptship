@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const existing = await db.query.lessonProgress.findFirst({
+    const existing = await db().query.lessonProgress.findFirst({
       where: and(
         eq(lessonProgress.userId, session.user.id),
         eq(lessonProgress.lessonId, lessonId)
@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
         })
         .where(eq(lessonProgress.id, existing.id));
     } else {
-      await db.insert(lessonProgress).values({
+      await db().insert(lessonProgress).values({
         userId: session.user.id,
         lessonId,
         lastPositionSec: position ?? 0,

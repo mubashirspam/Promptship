@@ -5,7 +5,7 @@ import { asc } from 'drizzle-orm';
 
 export async function GET() {
   try {
-    const allCategories = await db
+    const allCategories = await db()
       .select()
       .from(categories)
       .orderBy(asc(categories.displayOrder));

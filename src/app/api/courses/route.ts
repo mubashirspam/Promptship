@@ -5,13 +5,13 @@ import { eq, asc, and } from 'drizzle-orm';
 
 export async function GET() {
   try {
-    const modules = await db
+    const modules = await db()
       .select()
       .from(courseModules)
       .where(eq(courseModules.isPublished, true))
       .orderBy(asc(courseModules.displayOrder));
 
-    const allLessons = await db
+    const allLessons = await db()
       .select()
       .from(lessons)
       .where(eq(lessons.isPublished, true))

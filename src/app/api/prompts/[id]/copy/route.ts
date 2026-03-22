@@ -22,7 +22,7 @@ export async function POST(
     const userId = session.user.id;
 
     // Get user tier
-    const user = await db.query.users.findFirst({
+    const user = await db().query.users.findFirst({
       where: eq(users.id, userId),
       columns: { tier: true },
     });

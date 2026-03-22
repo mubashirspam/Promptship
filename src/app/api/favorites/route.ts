@@ -15,7 +15,7 @@ export async function GET() {
       );
     }
 
-    const userFavorites = await db
+    const userFavorites = await db()
       .select({
         id: favorites.id,
         promptId: favorites.promptId,
@@ -61,16 +61,19 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if already favorited
-    const existing = await db.query.favorites.findFirst({
-      where: and(
+    const existing = await db()
+      .select({ id: favorites.id })
+      .from(favorites)
+      .where(and(
         eq(favorites.userId, session.user.id),
         eq(favorites.promptId, promptId)
-      ),
-    });
+      ))
+      .limit(1)
+      .then(rows => rows[0]);
 
     if (existing) {
       // Remove favorite
-      await db
+      await db()
         .delete(favorites)
         .where(eq(favorites.id, existing.id));
 
@@ -78,7 +81,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Add favorite
-    await db.insert(favorites).values({
+    await db().insert(favorites).values({
       userId: session.user.id,
       promptId,
     });

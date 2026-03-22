@@ -15,10 +15,15 @@ export async function GET() {
       );
     }
 
-    const user = await db.query.users.findFirst({
-      where: eq(users.id, session.user.id),
-      columns: { credits: true, tier: true },
-    });
+    const user = await db()
+      .select({
+        credits: users.credits,
+        tier: users.tier,
+      })
+      .from(users)
+      .where(eq(users.id, session.user.id))
+      .limit(1)
+      .then(rows => rows[0]);
 
     if (!user) {
       return NextResponse.json(

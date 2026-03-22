@@ -21,10 +21,15 @@ export async function POST(request: NextRequest) {
     const userId = session.user.id;
 
     // Check tier access (pro+ only)
-    const user = await db.query.users.findFirst({
-      where: eq(users.id, userId),
-      columns: { tier: true, credits: true },
-    });
+    const user = await db()
+      .select({
+        tier: users.tier,
+        credits: users.credits,
+      })
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1)
+      .then(rows => rows[0]);
 
     const tier = (user?.tier ?? 'free') as Tier;
     if (!hasTierAccess(tier, 'pro')) {
@@ -60,7 +65,7 @@ export async function POST(request: NextRequest) {
 
     // Save generation and deduct credit atomically
     const [generationRows] = await Promise.all([
-      db
+      db()
         .insert(generations)
         .values({
           userId,
@@ -82,7 +87,7 @@ export async function POST(request: NextRequest) {
           costUsd: '0',
         })
         .returning(),
-      db
+      db()
         .update(users)
         .set({ credits: sql`GREATEST(${users.credits} - 1, 0)` })
         .where(eq(users.id, userId)),

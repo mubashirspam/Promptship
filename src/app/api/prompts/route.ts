@@ -25,10 +25,12 @@ export async function GET(request: NextRequest) {
 
     // Filter by category slug via join
     if (category) {
-      const cat = await db.query.categories.findFirst({
-        where: eq(categories.slug, category),
-        columns: { id: true },
-      });
+      const cat = await db()
+        .select({ id: categories.id })
+        .from(categories)
+        .where(eq(categories.slug, category))
+        .limit(1)
+        .then(rows => rows[0]);
       if (cat) {
         conditions.push(eq(prompts.categoryId, cat.id));
       }
@@ -49,7 +51,7 @@ export async function GET(request: NextRequest) {
             : desc(prompts.usageCount);
 
     // Fetch prompts with category name
-    const results = await db
+    const results = await db()
       .select({
         id: prompts.id,
         title: prompts.title,

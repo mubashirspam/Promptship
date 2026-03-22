@@ -19,7 +19,7 @@ export async function GET(
 
     const { id } = await props.params;
 
-    const generation = await db.query.generations.findFirst({
+    const generation = await db().query.generations.findFirst({
       where: and(
         eq(generations.id, id),
         eq(generations.userId, session.user.id)
