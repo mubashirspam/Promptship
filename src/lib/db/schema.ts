@@ -1,7 +1,6 @@
-import { relations } from 'drizzle-orm';
+import { relations, sql } from 'drizzle-orm';
 import {
   pgTable,
-  uuid,
   varchar,
   text,
   boolean,
@@ -13,6 +12,13 @@ import {
   index,
   uniqueIndex,
 } from 'drizzle-orm/pg-core';
+
+// Helper for text ID with UUID default
+const textId = (name: string) =>
+  text(name)
+    .notNull()
+    .default(sql`gen_random_uuid()`)
+    .$defaultFn(() => crypto.randomUUID());
 
 // ─── Enums ───────────────────────────────────────────────────────────────────
 
@@ -47,12 +53,62 @@ export const frameworkEnum = pgEnum('framework', [
 
 // ─── Tables ──────────────────────────────────────────────────────────────────
 
+export const accounts = pgTable(
+  'accounts',
+  {
+    id: textId('id').primaryKey(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    accountId: varchar('account_id', { length: 255 }).notNull(),
+    providerId: varchar('provider_id', { length: 255 }).notNull(),
+    accessToken: text('access_token'),
+    refreshToken: text('refresh_token'),
+    accessTokenExpiresAt: timestamp('access_token_expires_at', {
+      withTimezone: true,
+    }),
+    refreshTokenExpiresAt: timestamp('refresh_token_expires_at', {
+      withTimezone: true,
+    }),
+    scope: text('scope'),
+    idToken: text('id_token'),
+    password: text('password'),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index('accounts_user_id_idx').on(table.userId),
+    uniqueIndex('accounts_provider_account_idx').on(
+      table.providerId,
+      table.accountId
+    ),
+  ]
+);
+
+export const verifications = pgTable('verifications', {
+  id: textId('id').primaryKey(),
+  identifier: varchar('identifier', { length: 255 }).notNull(),
+  value: text('value').notNull(),
+  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
 export const users = pgTable(
   'users',
   {
-    id: uuid('id').defaultRandom().primaryKey(),
+    id: textId('id').primaryKey(),
     email: varchar('email', { length: 255 }).notNull(),
     name: varchar('name', { length: 255 }),
+    image: text('image'),
     avatarUrl: text('avatar_url'),
     tier: userTierEnum('tier').default('free').notNull(),
     role: userRoleEnum('role').default('user').notNull(),
@@ -81,8 +137,8 @@ export const users = pgTable(
 export const sessions = pgTable(
   'sessions',
   {
-    id: uuid('id').defaultRandom().primaryKey(),
-    userId: uuid('user_id')
+    id: textId('id').primaryKey(),
+    userId: text('user_id')
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
     token: varchar('token', { length: 255 }).notNull(),
@@ -90,6 +146,9 @@ export const sessions = pgTable(
     ipAddress: varchar('ip_address', { length: 45 }),
     userAgent: text('user_agent'),
     createdAt: timestamp('created_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
       .defaultNow()
       .notNull(),
   },
@@ -100,7 +159,7 @@ export const sessions = pgTable(
 );
 
 export const magicLinks = pgTable('magic_links', {
-  id: uuid('id').defaultRandom().primaryKey(),
+  id: textId('id').primaryKey(),
   email: varchar('email', { length: 255 }).notNull(),
   token: varchar('token', { length: 255 }).notNull().unique(),
   expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
@@ -113,8 +172,8 @@ export const magicLinks = pgTable('magic_links', {
 export const subscriptions = pgTable(
   'subscriptions',
   {
-    id: uuid('id').defaultRandom().primaryKey(),
-    userId: uuid('user_id')
+    id: textId('id').primaryKey(),
+    userId: text('user_id')
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
     plan: varchar('plan', { length: 50 }),
@@ -146,9 +205,9 @@ export const subscriptions = pgTable(
 );
 
 export const payments = pgTable('payments', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  userId: uuid('user_id').references(() => users.id, { onDelete: 'set null' }),
-  subscriptionId: uuid('subscription_id').references(() => subscriptions.id),
+  id: textId('id').primaryKey(),
+  userId: text('user_id').references(() => users.id, { onDelete: 'set null' }),
+  subscriptionId: text('subscription_id').references(() => subscriptions.id),
   provider: paymentProviderEnum('provider').notNull(),
   providerPaymentId: varchar('provider_payment_id', { length: 255 }),
   amount: integer('amount').notNull(),
@@ -160,7 +219,7 @@ export const payments = pgTable('payments', {
 });
 
 export const categories = pgTable('categories', {
-  id: uuid('id').defaultRandom().primaryKey(),
+  id: textId('id').primaryKey(),
   name: varchar('name', { length: 100 }).notNull(),
   slug: varchar('slug', { length: 100 }).notNull().unique(),
   description: text('description'),
@@ -174,8 +233,8 @@ export const categories = pgTable('categories', {
 export const prompts = pgTable(
   'prompts',
   {
-    id: uuid('id').defaultRandom().primaryKey(),
-    categoryId: uuid('category_id').references(() => categories.id),
+    id: textId('id').primaryKey(),
+    categoryId: text('category_id').references(() => categories.id),
     title: varchar('title', { length: 255 }).notNull(),
     slug: varchar('slug', { length: 255 }).notNull().unique(),
     description: text('description'),
@@ -207,11 +266,11 @@ export const prompts = pgTable(
 export const promptCopies = pgTable(
   'prompt_copies',
   {
-    id: uuid('id').defaultRandom().primaryKey(),
-    userId: uuid('user_id')
+    id: textId('id').primaryKey(),
+    userId: text('user_id')
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
-    promptId: uuid('prompt_id')
+    promptId: text('prompt_id')
       .notNull()
       .references(() => prompts.id, { onDelete: 'cascade' }),
     createdAt: timestamp('created_at', { withTimezone: true })
@@ -229,11 +288,11 @@ export const promptCopies = pgTable(
 export const favorites = pgTable(
   'favorites',
   {
-    id: uuid('id').defaultRandom().primaryKey(),
-    userId: uuid('user_id')
+    id: textId('id').primaryKey(),
+    userId: text('user_id')
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
-    promptId: uuid('prompt_id')
+    promptId: text('prompt_id')
       .notNull()
       .references(() => prompts.id, { onDelete: 'cascade' }),
     createdAt: timestamp('created_at', { withTimezone: true })
@@ -252,11 +311,11 @@ export const favorites = pgTable(
 export const generations = pgTable(
   'generations',
   {
-    id: uuid('id').defaultRandom().primaryKey(),
-    userId: uuid('user_id')
+    id: textId('id').primaryKey(),
+    userId: text('user_id')
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
-    promptId: uuid('prompt_id').references(() => prompts.id, {
+    promptId: text('prompt_id').references(() => prompts.id, {
       onDelete: 'set null',
     }),
     framework: varchar('framework', { length: 20 }),
@@ -283,7 +342,7 @@ export const generations = pgTable(
 );
 
 export const courseModules = pgTable('course_modules', {
-  id: uuid('id').defaultRandom().primaryKey(),
+  id: textId('id').primaryKey(),
   title: varchar('title', { length: 255 }).notNull(),
   slug: varchar('slug', { length: 255 }).notNull().unique(),
   description: text('description'),
@@ -295,8 +354,8 @@ export const courseModules = pgTable('course_modules', {
 });
 
 export const lessons = pgTable('lessons', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  moduleId: uuid('module_id')
+  id: textId('id').primaryKey(),
+  moduleId: text('module_id')
     .notNull()
     .references(() => courseModules.id, { onDelete: 'cascade' }),
   title: varchar('title', { length: 255 }).notNull(),
@@ -315,11 +374,11 @@ export const lessons = pgTable('lessons', {
 export const lessonProgress = pgTable(
   'lesson_progress',
   {
-    id: uuid('id').defaultRandom().primaryKey(),
-    userId: uuid('user_id')
+    id: textId('id').primaryKey(),
+    userId: text('user_id')
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
-    lessonId: uuid('lesson_id')
+    lessonId: text('lesson_id')
       .notNull()
       .references(() => lessons.id, { onDelete: 'cascade' }),
     watchTimeSec: integer('watch_time_sec').default(0).notNull(),
@@ -343,11 +402,19 @@ export const lessonProgress = pgTable(
 
 export const usersRelations = relations(users, ({ many }) => ({
   sessions: many(sessions),
+  accounts: many(accounts),
   subscriptions: many(subscriptions),
   promptCopies: many(promptCopies),
   favorites: many(favorites),
   generations: many(generations),
   lessonProgress: many(lessonProgress),
+}));
+
+export const accountsRelations = relations(accounts, ({ one }) => ({
+  user: one(users, {
+    fields: [accounts.userId],
+    references: [users.id],
+  }),
 }));
 
 export const sessionsRelations = relations(sessions, ({ one }) => ({

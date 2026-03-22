@@ -1,18 +1,10 @@
 import type { Metadata } from 'next';
-import { AuthCard } from '@/components/auth/auth-card';
-import { SignupForm } from '@/components/auth/signup-form';
+import { AuthForm } from '@/components/auth/auth-form';
 
 export const metadata: Metadata = {
-  title: 'Create Account',
+  title: 'Create Account - PromptShip',
 };
 
 export default function SignupPage() {
-  return (
-    <AuthCard
-      title="Create your account"
-      description="Get started with PromptShip for free"
-    >
-      <SignupForm />
-    </AuthCard>
-  );
+  return <AuthForm />;
 }

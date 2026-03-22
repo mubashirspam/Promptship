@@ -1,35 +1,49 @@
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
-import { db } from '@/lib/db';
-import { users, sessions } from '@/lib/db/schema';
-import { sendMagicLinkEmail } from '@/lib/email';
+import { admin } from 'better-auth/plugins';
+import { neon } from '@neondatabase/serverless';
+import { drizzle } from 'drizzle-orm/neon-http';
+import { users, sessions, accounts, verifications } from '@/lib/db/schema';
+
+const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'localhost:3000';
+const protocol = rootDomain.includes('localhost') ? 'http' : 'https';
+
+// Dedicated db instance for auth to avoid lazy-init issues
+const sql = neon(process.env.DATABASE_URL!);
+const authDb = drizzle(sql);
 
 export const auth = betterAuth({
-  database: drizzleAdapter(db, {
+  baseURL: process.env.BETTER_AUTH_URL || `${protocol}://${rootDomain}`,
+  trustedOrigins: [
+    `${protocol}://${rootDomain}`,
+    `${protocol}://app.${rootDomain}`,
+    `${protocol}://admin.${rootDomain}`,
+  ],
+  database: drizzleAdapter(authDb, {
     provider: 'pg',
     schema: {
       user: users,
       session: sessions,
+      account: accounts,
+      verification: verifications,
     },
   }),
   emailAndPassword: {
-    enabled: false,
-  },
-  magicLink: {
     enabled: true,
-    sendMagicLink: async ({ email, url }: { email: string; url: string }) => {
-      await sendMagicLinkEmail({ email, url });
-    },
   },
   socialProviders: {
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     },
+    github: {
+      clientId: process.env.GITHUB_CLIENT_ID!,
+      clientSecret: process.env.GITHUB_CLIENT_SECRET!,
+    },
   },
   session: {
-    expiresIn: 60 * 60 * 24 * 7, // 7 days
-    updateAge: 60 * 60 * 24, // Update session every 24 hours
+    expiresIn: 60 * 60 * 24 * 7,
+    updateAge: 60 * 60 * 24,
   },
   user: {
     additionalFields: {
@@ -37,12 +51,17 @@ export const auth = betterAuth({
         type: 'string',
         defaultValue: 'free',
       },
+      role: {
+        type: 'string',
+        defaultValue: 'user',
+      },
       credits: {
         type: 'number',
         defaultValue: 0,
       },
     },
   },
+  plugins: [admin()],
 });
 
 export type Session = typeof auth.$Infer.Session;

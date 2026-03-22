@@ -37,7 +37,9 @@ export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const subdomain = getSubdomain(host);
 
-  const sessionToken = request.cookies.get('better-auth.session_token')?.value;
+  const sessionToken =
+    request.cookies.get('better-auth.session_token')?.value ||
+    request.cookies.get('__Secure-better-auth.session_token')?.value;
 
   // ─── ADMIN SUBDOMAIN (admin.promptship.dev) ─────────────────────
   if (subdomain === 'admin') {

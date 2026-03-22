@@ -8,13 +8,16 @@ import { loginSchema, type LoginInput } from '@/lib/validations/auth';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
+import { GoogleSignInButton } from '@/components/auth/google-sign-in-button';
 import { cn } from '@/lib/utils';
 
 interface LoginFormProps {
   className?: string;
+  callbackURL?: string;
 }
 
-export function LoginForm({ className }: LoginFormProps) {
+export function LoginForm({ className, callbackURL = '/dashboard' }: LoginFormProps) {
   const [isSuccess, setIsSuccess] = useState(false);
   const [submittedEmail, setSubmittedEmail] = useState('');
 
@@ -60,30 +63,40 @@ export function LoginForm({ className }: LoginFormProps) {
   }
 
   return (
-    <form
-      onSubmit={handleSubmit(onSubmit)}
-      className={cn('flex flex-col gap-4', className)}
-    >
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="email">Email</Label>
-        <div className="relative">
-          <Mail className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            id="email"
-            type="email"
-            placeholder="you@example.com"
-            className="pl-9"
-            aria-invalid={!!errors.email}
-            {...register('email')}
-          />
-        </div>
-        {errors.email && (
-          <p className="text-xs text-destructive">{errors.email.message}</p>
-        )}
+    <div className={cn('flex flex-col gap-4', className)}>
+      <GoogleSignInButton callbackURL={callbackURL} />
+
+      <div className="relative flex items-center gap-4">
+        <Separator className="flex-1" />
+        <span className="text-xs text-muted-foreground uppercase">or</span>
+        <Separator className="flex-1" />
       </div>
-      <Button type="submit" disabled={isSubmitting} size="lg" className="w-full">
-        {isSubmitting ? 'Sending...' : 'Send Magic Link'}
-      </Button>
-    </form>
+
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="flex flex-col gap-4"
+      >
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="email">Email</Label>
+          <div className="relative">
+            <Mail className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              id="email"
+              type="email"
+              placeholder="you@example.com"
+              className="pl-9"
+              aria-invalid={!!errors.email}
+              {...register('email')}
+            />
+          </div>
+          {errors.email && (
+            <p className="text-xs text-destructive">{errors.email.message}</p>
+          )}
+        </div>
+        <Button type="submit" disabled={isSubmitting} size="lg" className="w-full">
+          {isSubmitting ? 'Sending...' : 'Send Magic Link'}
+        </Button>
+      </form>
+    </div>
   );
 }

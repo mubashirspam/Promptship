@@ -15,7 +15,10 @@
     "db:push:staging": "NODE_ENV=staging drizzle-kit push",
     "db:push:production": "NODE_ENV=production drizzle-kit push",
     "db:studio": "drizzle-kit studio",
-    "db:drop": "drizzle-kit drop"
+    "db:drop": "drizzle-kit drop",
+    "db:seed": "tsx scripts/seed.ts",
+    "db:seed:staging": "NODE_ENV=staging tsx scripts/seed.ts",
+    "db:seed:production": "NODE_ENV=production tsx scripts/seed.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.80.0",
