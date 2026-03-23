@@ -10,6 +10,7 @@ import {
   LayoutDashboard,
   Users,
   BarChart3,
+  BookOpen,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import type { Tier } from '@/lib/utils/constants';
@@ -98,6 +99,11 @@ export const adminNavigation = [
     title: 'Users',
     href: '/users',
     icon: Users,
+  },
+  {
+    title: 'Blog',
+    href: '/blog',
+    icon: BookOpen,
   },
   {
     title: 'Analytics',

@@ -12,6 +12,7 @@ import type {
   courseModules,
   lessons,
   lessonProgress,
+  blogPosts,
 } from '@/lib/db/schema';
 
 // Select types (what you get from the database)
@@ -27,6 +28,7 @@ export type Generation = InferSelectModel<typeof generations>;
 export type CourseModule = InferSelectModel<typeof courseModules>;
 export type Lesson = InferSelectModel<typeof lessons>;
 export type LessonProgress = InferSelectModel<typeof lessonProgress>;
+export type BlogPost = InferSelectModel<typeof blogPosts>;
 
 // Insert types (what you send to the database)
 export type NewUser = InferInsertModel<typeof users>;
@@ -41,6 +43,7 @@ export type NewGeneration = InferInsertModel<typeof generations>;
 export type NewCourseModule = InferInsertModel<typeof courseModules>;
 export type NewLesson = InferInsertModel<typeof lessons>;
 export type NewLessonProgress = InferInsertModel<typeof lessonProgress>;
+export type NewBlogPost = InferInsertModel<typeof blogPosts>;
 
 // Extended types
 export type PromptWithCategory = Prompt & {

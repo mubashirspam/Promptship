@@ -51,6 +51,17 @@ export const frameworkEnum = pgEnum('framework', [
   'vue',
 ]);
 
+export const blogStatusEnum = pgEnum('blog_status', [
+  'draft',
+  'published',
+  'archived',
+]);
+
+export const contentFormatEnum = pgEnum('content_format', [
+  'text',
+  'markdown',
+]);
+
 // ─── Tables ──────────────────────────────────────────────────────────────────
 
 export const accounts = pgTable(
@@ -341,6 +352,36 @@ export const generations = pgTable(
   ]
 );
 
+export const blogPosts = pgTable(
+  'blog_posts',
+  {
+    id: textId('id').primaryKey(),
+    title: varchar('title', { length: 255 }).notNull(),
+    slug: varchar('slug', { length: 255 }).notNull().unique(),
+    excerpt: text('excerpt'),
+    content: text('content').notNull(),
+    coverImageUrl: text('cover_image_url'),
+    authorId: text('author_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    status: blogStatusEnum('status').default('draft').notNull(),
+    category: varchar('category', { length: 100 }),
+    tags: text('tags').array().default([]),
+    publishedAt: timestamp('published_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index('blog_posts_status_idx').on(table.status),
+    index('blog_posts_author_id_idx').on(table.authorId),
+    index('blog_posts_published_at_idx').on(table.publishedAt),
+  ]
+);
+
 export const courseModules = pgTable('course_modules', {
   id: textId('id').primaryKey(),
   title: varchar('title', { length: 255 }).notNull(),
@@ -502,3 +543,10 @@ export const lessonProgressRelations = relations(
     }),
   })
 );
+
+export const blogPostsRelations = relations(blogPosts, ({ one }) => ({
+  author: one(users, {
+    fields: [blogPosts.authorId],
+    references: [users.id],
+  }),
+}));
