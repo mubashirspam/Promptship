@@ -13,7 +13,8 @@ import type { NextRequest } from 'next/server';
  *   admin.localhost:3000     → admin portal
  */
 
-const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'localhost:3000';
+const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 
+                    (process.env.NODE_ENV === 'production' ? 'promptship.dev' : 'localhost:3000');
 
 function getSubdomain(host: string): string | null {
   // Strip port for comparison
@@ -33,7 +34,10 @@ function getSubdomain(host: string): string | null {
 const publicAppPaths = ['/api/auth'];
 
 export async function proxy(request: NextRequest) {
-  const host = request.headers.get('host') || ROOT_DOMAIN;
+  // Vercel provides x-forwarded-host in production
+  const host = request.headers.get('x-forwarded-host') || 
+               request.headers.get('host') || 
+               ROOT_DOMAIN;
   const { pathname } = request.nextUrl;
   const subdomain = getSubdomain(host);
 
