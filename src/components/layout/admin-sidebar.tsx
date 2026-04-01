@@ -12,8 +12,11 @@ import { siteConfig } from '@/config/site';
 import { useUIStore } from '@/stores/ui-store';
 
 export function AdminSidebar() {
-  const pathname = usePathname();
+  const rawPathname = usePathname();
   const { sidebarOpen, toggleSidebar } = useUIStore();
+
+  // Strip /admin prefix so nav hrefs (/, /prompts, /users) match correctly
+  const pathname = rawPathname.replace(/^\/admin/, '') || '/';
 
   return (
     <aside

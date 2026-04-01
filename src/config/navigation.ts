@@ -11,6 +11,8 @@ import {
   Users,
   BarChart3,
   BookOpen,
+  CreditCard,
+  Package,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import type { Tier } from '@/lib/utils/constants';
@@ -106,9 +108,24 @@ export const adminNavigation = [
     icon: BookOpen,
   },
   {
+    title: 'Courses',
+    href: '/courses',
+    icon: Package,
+  },
+  {
+    title: 'Orders',
+    href: '/orders',
+    icon: CreditCard,
+  },
+  {
     title: 'Analytics',
     href: '/analytics',
     icon: BarChart3,
+  },
+  {
+    title: 'Settings',
+    href: '/settings',
+    icon: Settings,
   },
 ];
 

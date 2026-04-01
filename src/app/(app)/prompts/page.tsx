@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { PromptSearch } from '@/components/prompts/prompt-search';
 import { CategoryTabs } from '@/components/prompts/category-tabs';
 import { FrameworkFilter } from '@/components/prompts/framework-filter';
@@ -8,9 +8,27 @@ import { PromptGrid } from '@/components/prompts/prompt-grid';
 import { PromptModal } from '@/components/prompts/prompt-modal';
 import type { Prompt } from '@/components/prompts/prompt-card';
 
-// ---------------------------------------------------------------------------
-// Mock data — will be replaced by `usePrompts` hook + API calls
-// ---------------------------------------------------------------------------
+// Fetch prompts from API
+async function fetchPrompts(params: {
+  query?: string;
+  category?: string;
+  framework?: string;
+}): Promise<Prompt[]> {
+  const searchParams = new URLSearchParams();
+  if (params.query) searchParams.set('query', params.query);
+  if (params.category) searchParams.set('category', params.category);
+  if (params.framework) searchParams.set('framework', params.framework);
+
+  const response = await fetch(`/api/prompts?${searchParams.toString()}`);
+  const data = await response.json();
+  
+  if (data.success) {
+    return data.data.items;
+  }
+  return [];
+}
+
+// Mock data for fallback (kept for reference)
 const MOCK_PROMPTS: Prompt[] = [
   {
     id: '1',
@@ -132,35 +150,30 @@ export default function PromptsPage() {
   const [activeFramework, setActiveFramework] = useState<string | null>(null);
   const [selectedPrompt, setSelectedPrompt] = useState<Prompt | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [prompts, setPrompts] = useState<Prompt[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Filter prompts based on search, category, and framework
-  const filteredPrompts = useMemo(() => {
-    return MOCK_PROMPTS.filter((prompt) => {
-      // Search filter
-      if (search) {
-        const q = search.toLowerCase();
-        const matchesSearch =
-          prompt.title.toLowerCase().includes(q) ||
-          prompt.description?.toLowerCase().includes(q) ||
-          prompt.categoryName.toLowerCase().includes(q);
-        if (!matchesSearch) return false;
+  // Fetch prompts from API when filters change
+  useEffect(() => {
+    async function loadPrompts() {
+      setIsLoading(true);
+      try {
+        const data = await fetchPrompts({
+          query: search || undefined,
+          category: activeCategory || undefined,
+          framework: activeFramework || undefined,
+        });
+        setPrompts(data);
+      } catch (error) {
+        console.error('Failed to fetch prompts:', error);
+        // Fallback to mock data on error
+        setPrompts(MOCK_PROMPTS);
+      } finally {
+        setIsLoading(false);
       }
+    }
 
-      // Category filter
-      if (activeCategory) {
-        const slug = prompt.categoryName
-          .toLowerCase()
-          .replace(/[/\s]+/g, '-');
-        if (slug !== activeCategory) return false;
-      }
-
-      // Framework filter
-      if (activeFramework) {
-        if (!prompt.frameworks.includes(activeFramework)) return false;
-      }
-
-      return true;
-    });
+    loadPrompts();
   }, [search, activeCategory, activeFramework]);
 
   function handleSelectPrompt(prompt: Prompt) {
@@ -195,8 +208,8 @@ export default function PromptsPage() {
 
       {/* Prompt grid */}
       <PromptGrid
-        prompts={filteredPrompts}
-        isLoading={false}
+        prompts={prompts}
+        isLoading={isLoading}
         onSelect={handleSelectPrompt}
       />
 

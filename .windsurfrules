@@ -1,0 +1,106 @@
+# Windsurf Rules for PromptShip
+# These rules are automatically enforced on every AI code generation
+
+## Critical Constraints
+
+### File Structure
+- NEVER create files outside src/{app,components,lib,hooks,stores,types,config}
+- NEVER modify files in src/components/ui/ (shadcn primitives)
+- ALWAYS use absolute imports with @/ alias
+- NEVER use relative imports beyond parent directory
+
+### Component Rules
+- Server Components by default (no 'use client' unless interactive)
+- Client Components ONLY for: useState, useEffect, event handlers, browser APIs
+- ALWAYS group imports: react → next → third-party → local
+
+### Database & Validation
+- src/lib/db/schema.ts is the SINGLE SOURCE OF TRUTH
+- ALWAYS validate user inputs with Zod before database operations
+- NEVER use raw SQL queries (use Drizzle query builder)
+- Types MUST derive from schema using $inferSelect and $inferInsert
+
+### Styling
+- ONLY Tailwind utility classes (no inline styles, no CSS modules)
+- USE cn() from @/lib/utils/cn for conditional classes
+- NEVER use style={{ }} prop
+
+### Authentication & Security
+- ALWAYS check auth in API routes and Server Actions
+- NEVER trust client-side auth state for authorization
+- ALWAYS use environment variables for secrets
+- ALWAYS implement rate limiting on public endpoints
+
+### API Routes Pattern
+1. Rate limiting first
+2. Authentication check
+3. Zod validation
+4. Business logic
+5. Structured response
+
+### TypeScript
+- NEVER use 'any' type
+- ALWAYS define proper interfaces/types
+- USE type inference from Drizzle schema
+
+### State Management
+- Server state → React Query (@tanstack/react-query)
+- Client state → Zustand (src/stores/)
+- Form state → React Hook Form + Zod
+
+### Naming Conventions
+- Components: PascalCase (LoginForm.tsx)
+- Utilities: kebab-case (rate-limit.ts)
+- Functions: camelCase (getUserById)
+- Constants: UPPER_SNAKE_CASE (MAX_PROMPTS)
+
+### Error Handling
+- ALWAYS wrap risky operations in try-catch
+- ALWAYS return structured errors: { success: boolean, error?: string, data?: T }
+- NEVER expose internal errors to client
+
+### Performance
+- USE Server Components for static content
+- USE dynamic imports for heavy components
+- USE loading.tsx and error.tsx in routes
+- AVOID client-side data fetching when server-side possible
+
+## Before Every Generation
+
+1. ✅ Check AGENTS.md for detailed patterns
+2. ✅ Verify file location matches structure
+3. ✅ Check if similar code exists
+4. ✅ Use existing utilities (don't recreate)
+5. ✅ Add Zod validation for inputs
+6. ✅ Add error handling
+7. ✅ Use TypeScript strictly
+8. ✅ Match existing code style
+
+## Red Flags (STOP if you see these)
+
+- Creating folders outside defined structure
+- Using 'any' type
+- Skipping validation
+- Hardcoding API keys or secrets
+- Inline styles or CSS modules
+- Modifying src/components/ui/
+- Client Component for static content
+- Missing error handling
+- Relative imports like '../../../'
+
+## AI Provider Integration
+
+- NEVER instantiate Anthropic/OpenAI directly in components
+- ALWAYS use abstracted clients from @/lib/ai/
+- ALWAYS return structured GeneratedCode interface
+
+## Payment Integration
+
+- Support BOTH Stripe and Razorpay
+- Webhook handlers in app/api/webhooks/[provider]/
+- ALWAYS implement idempotency
+- ALWAYS create audit trail
+
+## Reference
+
+For complete patterns and examples, see AGENTS.md at project root.

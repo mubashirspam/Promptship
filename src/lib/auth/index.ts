@@ -44,6 +44,21 @@ export const auth = betterAuth({
   session: {
     expiresIn: 60 * 60 * 24 * 7,
     updateAge: 60 * 60 * 24,
+    cookieCache: {
+      enabled: true,
+      maxAge: 60 * 5,
+    },
+  },
+  advanced: {
+    cookiePrefix: 'ps',
+    defaultCookieAttributes: {
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+      // Domain must start with . for subdomains to share cookies
+      domain: rootDomain.includes('localhost')
+        ? undefined // localhost doesn't need domain for subdomains
+        : `.${rootDomain}`,
+    },
   },
   user: {
     additionalFields: {

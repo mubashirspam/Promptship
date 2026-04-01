@@ -18,20 +18,20 @@ interface PromptGridProps {
 function PromptCardSkeleton() {
   return (
     <div className="flex flex-col overflow-hidden rounded-xl ring-1 ring-foreground/10">
-      <Skeleton className="aspect-[16/10] w-full rounded-none" />
+      <div className="aspect-[16/10] w-full animate-pulse bg-muted" />
       <div className="flex flex-col gap-2 p-4">
-        <Skeleton className="h-5 w-3/4" />
+        <div className="h-5 w-3/4 animate-pulse rounded bg-muted" />
         <div className="flex gap-1.5">
-          <Skeleton className="h-5 w-16 rounded-full" />
-          <Skeleton className="size-2.5 rounded-full" />
-          <Skeleton className="size-2.5 rounded-full" />
+          <div className="h-5 w-16 animate-pulse rounded-full bg-muted" />
+          <div className="size-2.5 animate-pulse rounded-full bg-muted" />
+          <div className="size-2.5 animate-pulse rounded-full bg-muted" />
         </div>
-        <Skeleton className="h-4 w-full" />
-        <Skeleton className="h-4 w-2/3" />
+        <div className="h-4 w-full animate-pulse rounded bg-muted" />
+        <div className="h-4 w-2/3 animate-pulse rounded bg-muted" />
       </div>
       <div className="flex gap-2 border-t p-4">
-        <Skeleton className="h-7 flex-1 rounded-lg" />
-        <Skeleton className="size-7 rounded-lg" />
+        <div className="h-7 flex-1 animate-pulse rounded-lg bg-muted" />
+        <div className="size-7 animate-pulse rounded-lg bg-muted" />
       </div>
     </div>
   );

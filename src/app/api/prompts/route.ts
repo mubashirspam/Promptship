@@ -61,6 +61,7 @@ export async function GET(request: NextRequest) {
         tier: prompts.tier,
         frameworks: prompts.frameworks,
         previewImageUrl: prompts.previewImageUrl,
+        previewVideoUrl: sql<string | null>`preview_video_url`,
         usageCount: prompts.usageCount,
         copyCount: prompts.copyCount,
         favoriteCount: prompts.favoriteCount,

@@ -1,20 +1,48 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { authClient } from '@/lib/auth/client';
 import { Button } from '@/components/ui/button';
 
-interface SocialButtonsProps {
-  callbackURL?: string;
+// Wrapper component with Suspense boundary
+export function SocialButtons() {
+  return (
+    <Suspense fallback={<SocialButtonsSkeleton />}>
+      <SocialButtonsContent />
+    </Suspense>
+  );
 }
 
-export function SocialButtons({ callbackURL = '/dashboard' }: SocialButtonsProps) {
+// Loading skeleton
+function SocialButtonsSkeleton() {
+  return (
+    <div className="grid grid-cols-2 gap-3">
+      <Button variant="outline" size="lg" disabled className="gap-2">
+        <div className="size-5 animate-pulse bg-muted rounded" />
+        Loading...
+      </Button>
+      <Button variant="outline" size="lg" disabled className="gap-2">
+        <div className="size-5 animate-pulse bg-muted rounded" />
+        Loading...
+      </Button>
+    </div>
+  );
+}
+
+// Actual content component
+function SocialButtonsContent() {
   const [loadingProvider, setLoadingProvider] = useState<string | null>(null);
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
 
   async function handleSocial(provider: 'google' | 'github') {
     setLoadingProvider(provider);
     try {
-      await authClient.signIn.social({ provider, callbackURL });
+      await authClient.signIn.social({ 
+        provider, 
+        callbackURL: callbackUrl 
+      });
     } catch {
       setLoadingProvider(null);
     }

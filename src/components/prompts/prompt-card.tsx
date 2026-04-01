@@ -17,6 +17,7 @@ export interface Prompt {
   frameworks: string[];
   categoryName: string;
   previewImageUrl: string | null;
+  previewVideoUrl?: string | null; // Video/GIF preview support
   usageCount: number;
   isFeatured: boolean;
 }
@@ -110,7 +111,17 @@ export function PromptCard({
     >
       {/* Preview area with gradient */}
       <div className="relative aspect-[16/10] w-full overflow-hidden rounded-t-xl">
-        {prompt.previewImageUrl ? (
+        {prompt.previewVideoUrl ? (
+          <video
+            src={prompt.previewVideoUrl}
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="size-full object-cover transition-transform group-hover:scale-105"
+            poster={prompt.previewImageUrl || undefined}
+          />
+        ) : prompt.previewImageUrl ? (
           <img
             src={prompt.previewImageUrl}
             alt={prompt.title}

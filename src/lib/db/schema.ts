@@ -250,15 +250,41 @@ export const prompts = pgTable(
     slug: varchar('slug', { length: 255 }).notNull().unique(),
     description: text('description'),
     promptText: text('prompt_text').notNull(),
+    
+    // Premium template fields
+    detailedPrompt: text('detailed_prompt'), // Full markdown specification
+    templateType: varchar('template_type', { length: 50 }).default('simple'), // 'simple' | 'detailed' | 'premium'
+    previewImageUrl: text('preview_image_url'),
+    previewVideoUrl: text('preview_video_url'), // For video backgrounds/demos
+    thumbnailUrl: text('thumbnail_url'), // Grid view thumbnail
+    
+    // Technical specifications (stored as JSONB)
+    technicalSpecs: jsonb('technical_specs').$type<{
+      fonts?: { name: string; weights: number[]; url?: string }[];
+      colors?: { name: string; hsl: string; usage: string }[];
+      animations?: { name: string; keyframes: string; usage: string }[];
+      dependencies?: { name: string; version: string; required: boolean }[];
+      assets?: { type: string; url: string; description: string }[];
+    }>(),
+    
+    // Layout & structure metadata
+    layoutMetadata: jsonb('layout_metadata').$type<{
+      sections?: string[]; // ['navigation', 'hero', 'features', 'footer']
+      components?: string[]; // ['Button', 'Card', 'Modal']
+      complexity?: 'simple' | 'medium' | 'complex';
+      responsive?: boolean;
+      darkMode?: boolean;
+    }>(),
+    
     tier: userTierEnum('tier').default('free').notNull(),
     frameworks: varchar('frameworks', { length: 20 })
       .array()
       .default(['react']),
-    previewImageUrl: text('preview_image_url'),
     usageCount: integer('usage_count').default(0).notNull(),
     copyCount: integer('copy_count').default(0).notNull(),
     favoriteCount: integer('favorite_count').default(0).notNull(),
     isFeatured: boolean('is_featured').default(false),
+    isPremium: boolean('is_premium').default(false), // Premium template badge
     isPublished: boolean('is_published').default(true),
     createdAt: timestamp('created_at', { withTimezone: true })
       .defaultNow()
@@ -271,6 +297,8 @@ export const prompts = pgTable(
     index('prompts_category_id_idx').on(table.categoryId),
     index('prompts_tier_idx').on(table.tier),
     index('prompts_is_published_idx').on(table.isPublished),
+    index('prompts_template_type_idx').on(table.templateType),
+    index('prompts_is_premium_idx').on(table.isPremium),
   ]
 );
 
