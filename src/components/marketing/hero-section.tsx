@@ -2,15 +2,8 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { ArrowRight, Sparkles, Star } from "lucide-react";
 import { siteConfig } from "@/config/site";
 
@@ -108,70 +101,6 @@ export function HeroSection() {
           </motion.div>
         </motion.div>
 
-        {/* Decorative code preview */}
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.45, ease: "easeOut" }}
-          className="mx-auto mt-16 max-w-3xl"
-        >
-          <Card className="border-foreground/5 bg-card/80 shadow-2xl backdrop-blur-sm">
-            <CardHeader className="border-b">
-              <CardTitle className="flex items-center gap-2 text-sm font-mono">
-                <span className="flex gap-1.5">
-                  <span className="inline-block size-3 rounded-full bg-red-500/80" />
-                  <span className="inline-block size-3 rounded-full bg-yellow-500/80" />
-                  <span className="inline-block size-3 rounded-full bg-green-500/80" />
-                </span>
-                <span className="ml-2 text-muted-foreground">
-                  prompt-preview.tsx
-                </span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-4">
-              <pre className="overflow-x-auto text-sm leading-relaxed">
-                <code>
-                  <span className="text-purple-500">{"import "}</span>
-                  <span className="text-foreground">{"{ "}</span>
-                  <span className="text-cyan-500">generateUI</span>
-                  <span className="text-foreground">{" } "}</span>
-                  <span className="text-purple-500">from </span>
-                  <span className="text-orange-500">{'"promtify"'}</span>
-                  <span className="text-foreground">{";"}</span>
-                  {"\n\n"}
-                  <span className="text-purple-500">{"const "}</span>
-                  <span className="text-cyan-500">hero</span>
-                  <span className="text-foreground">{" = "}</span>
-                  <span className="text-purple-500">await </span>
-                  <span className="text-cyan-500">generateUI</span>
-                  <span className="text-foreground">{"("}</span>
-                  {"\n"}
-                  <span className="text-orange-500">
-                    {'  "A modern SaaS hero section with'}
-                  </span>
-                  {"\n"}
-                  <span className="text-orange-500">
-                    {'   gradient text, floating mockup, and'}
-                  </span>
-                  {"\n"}
-                  <span className="text-orange-500">
-                    {'   glassmorphism card overlay"'}
-                  </span>
-                  {"\n"}
-                  <span className="text-foreground">{");"}</span>
-                  {"\n\n"}
-                  <span className="text-muted-foreground">
-                    {"// => Production-ready React + Tailwind"}
-                  </span>
-                  {"\n"}
-                  <span className="text-muted-foreground">
-                    {"//    component in seconds"}
-                  </span>
-                </code>
-              </pre>
-            </CardContent>
-          </Card>
-        </motion.div>
       </div>
     </section>
   );

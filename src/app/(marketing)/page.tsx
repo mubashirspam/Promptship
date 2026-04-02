@@ -12,11 +12,11 @@ export default function HomePage() {
   return (
     <>
       <HeroSection />
-      <StatsSection />
-      <FeaturesGrid />
       <div id="templates">
         <TemplateShowcase />
       </div>
+      <StatsSection />
+      <FeaturesGrid />
       <HowItWorks />
       <PricingCards />
       <Testimonials />
