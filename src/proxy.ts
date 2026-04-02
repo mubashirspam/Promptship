@@ -48,6 +48,11 @@ export async function proxy(request: NextRequest) {
 
   // ─── ADMIN SUBDOMAIN (admin.promtify.dev) ─────────────────────
   if (subdomain === 'admin') {
+    // API routes (auth sign-out, etc.) must pass through without rewriting
+    if (pathname.startsWith('/api/')) {
+      return NextResponse.next();
+    }
+
     // Must be authenticated + admin role
     if (!sessionToken) {
       const loginUrl = new URL('/login', `${request.nextUrl.protocol}//app.${ROOT_DOMAIN}`);

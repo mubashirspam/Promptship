@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { ArrowLeft, ChevronLeft, ChevronRight, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Logo } from '@/components/shared/logo';
@@ -14,12 +14,12 @@ import { authClient } from '@/lib/auth/client';
 
 export function AdminSidebar() {
   const rawPathname = usePathname();
-  const router = useRouter();
   const { sidebarOpen, toggleSidebar } = useUIStore();
 
   async function handleLogout() {
     await authClient.signOut();
-    router.push(`${siteConfig.appUrl}/login`);
+    // Cross-subdomain redirect: router.push() won't cross origins
+    window.location.href = `${siteConfig.appUrl}/login`;
   }
 
   // Strip /admin prefix so nav hrefs (/, /prompts, /users) match correctly
