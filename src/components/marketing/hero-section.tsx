@@ -136,7 +136,7 @@ export function HeroSection() {
                   <span className="text-cyan-500">generateUI</span>
                   <span className="text-foreground">{" } "}</span>
                   <span className="text-purple-500">from </span>
-                  <span className="text-orange-500">{'"promptship"'}</span>
+                  <span className="text-orange-500">{'"promtify"'}</span>
                   <span className="text-foreground">{";"}</span>
                   {"\n\n"}
                   <span className="text-purple-500">{"const "}</span>

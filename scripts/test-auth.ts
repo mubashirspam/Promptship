@@ -24,7 +24,7 @@ const auth = betterAuth({
 async function test() {
   try {
     const result = await auth.api.signUpEmail({
-      body: { email: 'admin@promptship.dev', password: 'Admin@123', name: 'Mubashir Ahmed' },
+      body: { email: 'admin@promtify.dev', password: 'Admin@123', name: 'Mubashir Ahmed' },
     });
     console.log('SUCCESS:', JSON.stringify(result, null, 2));
   } catch (error: unknown) {

@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { AuthForm } from '@/components/auth/auth-form';
 
 export const metadata: Metadata = {
-  title: 'Sign In - PromptShip',
+  title: 'Sign In - Promtify',
 };
 
 export default function LoginPage() {

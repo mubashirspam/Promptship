@@ -7,7 +7,7 @@ function getResendClient() {
   return new Resend(process.env.RESEND_API_KEY);
 }
 
-const EMAIL_FROM = process.env.EMAIL_FROM || 'PromptShip <hello@promptship.dev>';
+const EMAIL_FROM = process.env.EMAIL_FROM || 'Promtify <hello@promtify.dev>';
 
 export async function sendMagicLinkEmail({
   email,
@@ -20,10 +20,10 @@ export async function sendMagicLinkEmail({
   await resend.emails.send({
     from: EMAIL_FROM,
     to: email,
-    subject: 'Sign in to PromptShip',
+    subject: 'Sign in to Promtify',
     html: `
       <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2 style="color: #7C3AED;">Sign in to PromptShip</h2>
+        <h2 style="color: #7C3AED;">Sign in to Promtify</h2>
         <p>Click the link below to sign in to your account. This link expires in 15 minutes.</p>
         <a href="${url}" style="display: inline-block; background: #7C3AED; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600;">
           Sign In
@@ -41,10 +41,10 @@ export async function sendWelcomeEmail({ email, name }: { email: string; name?: 
   await resend.emails.send({
     from: EMAIL_FROM,
     to: email,
-    subject: 'Welcome to PromptShip!',
+    subject: 'Welcome to Promtify!',
     html: `
       <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2 style="color: #7C3AED;">Welcome to PromptShip${name ? `, ${name}` : ''}!</h2>
+        <h2 style="color: #7C3AED;">Welcome to Promtify${name ? `, ${name}` : ''}!</h2>
         <p>You now have access to our curated library of AI prompts for UI generation.</p>
         <p>Here's what you can do:</p>
         <ul>

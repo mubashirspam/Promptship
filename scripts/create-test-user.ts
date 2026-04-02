@@ -6,7 +6,7 @@ const sql = neon(process.env.DATABASE_URL!);
 const db = drizzle(sql);
 
 async function createTestUser() {
-  const testEmail = 'user@promptship.dev';
+  const testEmail = 'user@promtify.dev';
   const testName = 'Test User';
 
   console.log('Creating test user account...');

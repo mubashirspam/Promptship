@@ -3,9 +3,9 @@ import type { NextRequest } from 'next/server';
 
 /**
  * Subdomain routing strategy:
- *   promptship.dev          → (marketing) public pages
- *   app.promptship.dev      → (app) authenticated user portal
- *   admin.promptship.dev    → (admin) admin portal
+ *   promtify.dev          → (marketing) public pages
+ *   app.promtify.dev      → (app) authenticated user portal
+ *   admin.promtify.dev    → (admin) admin portal
  *
  * Local development:
  *   localhost:3000           → marketing
@@ -14,7 +14,7 @@ import type { NextRequest } from 'next/server';
  */
 
 const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 
-                    (process.env.NODE_ENV === 'production' ? 'promptship.dev' : 'localhost:3000');
+                    (process.env.NODE_ENV === 'production' ? 'promtify.dev' : 'localhost:3000');
 
 function getSubdomain(host: string): string | null {
   // Strip port for comparison
@@ -41,11 +41,12 @@ export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const subdomain = getSubdomain(host);
 
+  // Cookie prefix is 'ps' (set in src/lib/auth/index.ts → advanced.cookiePrefix)
   const sessionToken =
-    request.cookies.get('better-auth.session_token')?.value ||
-    request.cookies.get('__Secure-better-auth.session_token')?.value;
+    request.cookies.get('ps.session_token')?.value ||
+    request.cookies.get('__Secure-ps.session_token')?.value;
 
-  // ─── ADMIN SUBDOMAIN (admin.promptship.dev) ─────────────────────
+  // ─── ADMIN SUBDOMAIN (admin.promtify.dev) ─────────────────────
   if (subdomain === 'admin') {
     // Must be authenticated + admin role
     if (!sessionToken) {
@@ -62,19 +63,16 @@ export async function proxy(request: NextRequest) {
     return NextResponse.rewrite(url);
   }
 
-  // ─── APP SUBDOMAIN (app.promptship.dev) ──────────────────────────
+  // ─── APP SUBDOMAIN (app.promtify.dev) ──────────────────────────
   if (subdomain === 'app') {
     const isPublicPath = publicAppPaths.some((p) => pathname.startsWith(p));
     const isAuthRoute = ['/login', '/signup', '/verify'].some((r) => pathname.startsWith(r));
 
-    // Auth routes: /login, /signup, /verify — no session required
+    // Auth routes: /login, /signup, /verify — always pass through.
+    // The auth layout verifies the session server-side and redirects if already
+    // logged in. The proxy must NOT redirect here — it cannot validate whether
+    // the session token is actually still valid in the DB.
     if (isAuthRoute) {
-      if (sessionToken) {
-        // Already logged in → redirect to dashboard
-        const dashUrl = new URL('/dashboard', request.url);
-        return NextResponse.redirect(dashUrl);
-      }
-      // Let auth pages render normally (they live under (auth)/ route group)
       return NextResponse.next();
     }
 
@@ -95,7 +93,15 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // ─── MAIN DOMAIN (promptship.dev) ────────────────────────────────
+  // ─── MAIN DOMAIN (promtify.dev) ────────────────────────────────
+  // Logged-in users on the root domain → send to app subdomain.
+  // The app layout will then redirect admins onward to admin subdomain.
+  if (sessionToken && pathname === '/') {
+    return NextResponse.redirect(
+      new URL('/dashboard', `${request.nextUrl.protocol}//app.${ROOT_DOMAIN}`)
+    );
+  }
+
   // Block /admin and app-only routes on the main domain
   if (pathname.startsWith('/admin')) {
     const adminUrl = new URL(pathname.replace('/admin', '') || '/', `${request.nextUrl.protocol}//admin.${ROOT_DOMAIN}`);

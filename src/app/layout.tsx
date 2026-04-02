@@ -42,7 +42,7 @@ export const metadata: Metadata = {
     title: siteConfig.name,
     description: siteConfig.description,
     images: [siteConfig.ogImage],
-    creator: '@promptship',
+    creator: '@promtify',
   },
   robots: {
     index: true,

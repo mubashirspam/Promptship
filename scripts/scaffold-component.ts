@@ -1,7 +1,7 @@
 #!/usr/bin/env tsx
 /**
  * Component Scaffolding Script
- * Generates component boilerplate following PromptShip architecture
+ * Generates component boilerplate following Promtify architecture
  * 
  * Usage:
  *   pnpm scaffold:component <type> <name>

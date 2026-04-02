@@ -20,7 +20,7 @@ const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 export function ThemeProvider({
   children,
   defaultTheme = 'dark',
-  storageKey = 'promptship-theme',
+  storageKey = 'promtify-theme',
 }: ThemeProviderProps) {
   const [theme, setTheme] = useState<Theme>(defaultTheme);
 

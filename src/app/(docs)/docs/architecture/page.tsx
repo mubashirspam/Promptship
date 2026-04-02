@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Technical Architecture',
-  description: 'Complete technical architecture and system design for PromptShip.',
+  description: 'Complete technical architecture and system design for Promtify.',
 };
 
 export default function ArchitecturePage() {
@@ -11,7 +11,7 @@ export default function ArchitecturePage() {
       <iframe
         src="/docs/promptship-technical-architecture.html"
         className="w-full min-h-screen border-none"
-        title="PromptShip Technical Architecture"
+        title="Promtify Technical Architecture"
       />
     </div>
   );

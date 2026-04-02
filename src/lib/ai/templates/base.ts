@@ -1,7 +1,7 @@
 export const baseTemplate = {
   name: 'base',
   description: 'Base template for all generations',
-  systemContext: `You are PromptShip's AI code generator. You create production-ready UI components.
+  systemContext: `You are Promtify's AI code generator. You create production-ready UI components.
 Rules:
 1. Return ONLY code, no markdown fences or explanations
 2. Include all necessary imports

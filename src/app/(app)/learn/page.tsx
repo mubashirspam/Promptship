@@ -64,7 +64,7 @@ const MODULES: Module[] = [
     number: 4,
     title: 'Flutter Deep Dive',
     description:
-      'Explore Flutter-specific generation techniques, widget composition patterns, responsive layouts, and platform-adaptive UI with PromptShip.',
+      'Explore Flutter-specific generation techniques, widget composition patterns, responsive layouts, and platform-adaptive UI with Promtify.',
     lessons: 8,
     duration: 160,
     progress: 0,

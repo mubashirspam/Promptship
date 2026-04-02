@@ -52,7 +52,7 @@ export default function UpgradePage() {
       <div className="text-center space-y-2">
         <h1 className="text-3xl font-bold">Upgrade Your Plan</h1>
         <p className="text-muted-foreground max-w-lg mx-auto">
-          Unlock the full potential of PromptShip. Choose the plan that fits your needs.
+          Unlock the full potential of Promtify. Choose the plan that fits your needs.
         </p>
       </div>
 

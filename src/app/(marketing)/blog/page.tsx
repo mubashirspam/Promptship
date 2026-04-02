@@ -9,7 +9,7 @@ import { format } from 'date-fns';
 
 export const metadata: Metadata = {
   title: 'Blog',
-  description: 'Latest articles, tutorials, and updates from PromptShip.',
+  description: 'Latest articles, tutorials, and updates from Promtify.',
 };
 
 export const dynamic = 'force-dynamic';

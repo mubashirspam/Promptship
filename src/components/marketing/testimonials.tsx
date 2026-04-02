@@ -16,14 +16,14 @@ const testimonials = [
     name: "Sarah Chen",
     role: "Frontend Engineer at Vercel",
     quote:
-      "PromptShip completely changed how I build UIs. What used to take me hours now takes minutes. The prompt quality is incredible - every component comes out production-ready.",
+      "Promtify completely changed how I build UIs. What used to take me hours now takes minutes. The prompt quality is incredible - every component comes out production-ready.",
     initials: "SC",
   },
   {
     name: "Raj Patel",
     role: "Indie Hacker & Founder",
     quote:
-      "As a solo founder, PromptShip is my secret weapon. I shipped my entire SaaS landing page in an afternoon. The multi-framework support means I can prototype in HTML and ship in React.",
+      "As a solo founder, Promtify is my secret weapon. I shipped my entire SaaS landing page in an afternoon. The multi-framework support means I can prototype in HTML and ship in React.",
     initials: "RP",
   },
   {
@@ -45,7 +45,7 @@ export function Testimonials() {
             <span className="gradient-text">developers</span>
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-muted-foreground">
-            See what developers around the world are saying about PromptShip.
+            See what developers around the world are saying about Promtify.
           </p>
         </div>
 

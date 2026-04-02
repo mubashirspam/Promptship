@@ -1,6 +1,6 @@
-export const APP_NAME = 'PromptShip';
+export const APP_NAME = 'Promtify';
 export const APP_DESCRIPTION = 'Ship beautiful UIs with AI - curated prompts, one-click generation, and education.';
-export const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://promptship.dev';
+export const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://promtify.dev';
 
 export const FRAMEWORKS = ['react', 'flutter', 'html', 'vue'] as const;
 export type Framework = (typeof FRAMEWORKS)[number];

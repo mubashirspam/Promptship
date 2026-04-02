@@ -17,7 +17,7 @@ import {
 import type { LucideIcon } from 'lucide-react';
 import type { Tier } from '@/lib/utils/constants';
 
-// ─── App portal (app.promptship.dev) ───────────────────────────
+// ─── App portal (app.promtify.dev) ───────────────────────────
 
 export interface NavItem {
   title: string;
@@ -83,7 +83,7 @@ export const settingsItem: NavItem = {
   tier: 'all',
 };
 
-// ─── Admin portal (admin.promptship.dev) ───────────────────────
+// ─── Admin portal (admin.promtify.dev) ───────────────────────
 // Relative paths on the admin subdomain.
 // The proxy rewrites / → /admin, /prompts → /admin/prompts, etc.
 export const adminNavigation = [
@@ -129,7 +129,7 @@ export const adminNavigation = [
   },
 ];
 
-// ─── Marketing (promptship.dev) ────────────────────────────────
+// ─── Marketing (promtify.dev) ────────────────────────────────
 export const marketingNavigation = [
   { title: 'Features', href: '/#features' },
   { title: 'Pricing', href: '/pricing' },

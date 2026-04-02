@@ -7,7 +7,7 @@ const sql = neon(process.env.DATABASE_URL!);
 const db = drizzle(sql);
 
 async function createAdmin() {
-  const adminEmail = 'admin@promptship.dev';
+  const adminEmail = 'admin@promtify.dev';
   const adminPassword = 'Admin@123'; // Change this after first login
   const adminName = 'Admin User';
 

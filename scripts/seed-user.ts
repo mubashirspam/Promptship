@@ -16,7 +16,7 @@ async function seedUser() {
   const existing = await db
     .select()
     .from(schema.users)
-    .where(eq(schema.users.email, 'admin@promptship.dev'))
+    .where(eq(schema.users.email, 'admin@promtify.dev'))
     .limit(1);
 
   if (existing.length === 0) {
@@ -189,7 +189,7 @@ async function seedUser() {
   console.log('\n========================================');
   console.log('Sample data seeded successfully!');
   console.log('========================================');
-  console.log(`User:     admin@promptship.dev`);
+  console.log(`User:     admin@promtify.dev`);
   console.log('========================================');
   console.log('Sample data added:');
   console.log('  - 4 favorites');

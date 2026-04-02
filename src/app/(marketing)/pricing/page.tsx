@@ -4,7 +4,7 @@ import { FAQAccordion } from '@/components/marketing/faq-accordion';
 
 export const metadata: Metadata = {
   title: 'Pricing',
-  description: 'Simple, transparent pricing for PromptShip. Start free, upgrade when ready.',
+  description: 'Simple, transparent pricing for Promtify. Start free, upgrade when ready.',
 };
 
 export default function PricingPage() {

@@ -13,14 +13,12 @@ import {
   uniqueIndex,
 } from 'drizzle-orm/pg-core';
 
-// Helper for text ID with UUID default
+
 const textId = (name: string) =>
   text(name)
     .notNull()
     .default(sql`gen_random_uuid()`)
     .$defaultFn(() => crypto.randomUUID());
-
-// ─── Enums ───────────────────────────────────────────────────────────────────
 
 export const userTierEnum = pgEnum('user_tier', [
   'free',
@@ -61,8 +59,6 @@ export const contentFormatEnum = pgEnum('content_format', [
   'text',
   'markdown',
 ]);
-
-// ─── Tables ──────────────────────────────────────────────────────────────────
 
 export const accounts = pgTable(
   'accounts',
@@ -251,14 +247,14 @@ export const prompts = pgTable(
     description: text('description'),
     promptText: text('prompt_text').notNull(),
     
-    // Premium template fields
-    detailedPrompt: text('detailed_prompt'), // Full markdown specification
-    templateType: varchar('template_type', { length: 50 }).default('simple'), // 'simple' | 'detailed' | 'premium'
-    previewImageUrl: text('preview_image_url'),
-    previewVideoUrl: text('preview_video_url'), // For video backgrounds/demos
-    thumbnailUrl: text('thumbnail_url'), // Grid view thumbnail
     
-    // Technical specifications (stored as JSONB)
+    detailedPrompt: text('detailed_prompt'), 
+    templateType: varchar('template_type', { length: 50 }).default('simple'), 
+    previewImageUrl: text('preview_image_url'),
+    previewVideoUrl: text('preview_video_url'), 
+    thumbnailUrl: text('thumbnail_url'), 
+    
+    
     technicalSpecs: jsonb('technical_specs').$type<{
       fonts?: { name: string; weights: number[]; url?: string }[];
       colors?: { name: string; hsl: string; usage: string }[];
@@ -267,10 +263,10 @@ export const prompts = pgTable(
       assets?: { type: string; url: string; description: string }[];
     }>(),
     
-    // Layout & structure metadata
+    
     layoutMetadata: jsonb('layout_metadata').$type<{
-      sections?: string[]; // ['navigation', 'hero', 'features', 'footer']
-      components?: string[]; // ['Button', 'Card', 'Modal']
+      sections?: string[]; 
+      components?: string[]; 
       complexity?: 'simple' | 'medium' | 'complex';
       responsive?: boolean;
       darkMode?: boolean;
@@ -284,7 +280,7 @@ export const prompts = pgTable(
     copyCount: integer('copy_count').default(0).notNull(),
     favoriteCount: integer('favorite_count').default(0).notNull(),
     isFeatured: boolean('is_featured').default(false),
-    isPremium: boolean('is_premium').default(false), // Premium template badge
+    isPremium: boolean('is_premium').default(false), 
     isPublished: boolean('is_published').default(true),
     createdAt: timestamp('created_at', { withTimezone: true })
       .defaultNow()
@@ -467,7 +463,6 @@ export const lessonProgress = pgTable(
   ]
 );
 
-// ─── Relations ───────────────────────────────────────────────────────────────
 
 export const usersRelations = relations(users, ({ many }) => ({
   sessions: many(sessions),

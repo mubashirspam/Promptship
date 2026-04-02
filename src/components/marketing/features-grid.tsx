@@ -45,7 +45,7 @@ export function FeaturesGrid() {
             <span className="gradient-text">build faster</span>
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
-            PromptShip gives you the tools, prompts, and knowledge to ship
+            Promtify gives you the tools, prompts, and knowledge to ship
             beautiful user interfaces at record speed.
           </p>
         </div>

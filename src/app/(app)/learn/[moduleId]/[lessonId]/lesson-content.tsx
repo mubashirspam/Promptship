@@ -39,7 +39,7 @@ const COURSE_DATA: ModuleData[] = [
     number: 1,
     title: 'Foundations',
     lessons: [
-      { id: 'lesson-1', number: 1, title: 'Introduction to PromptShip', duration: 12, completed: false },
+      { id: 'lesson-1', number: 1, title: 'Introduction to Promtify', duration: 12, completed: false },
       { id: 'lesson-2', number: 2, title: 'Understanding AI Prompts', duration: 15, completed: false },
       { id: 'lesson-3', number: 3, title: 'Your First Generation', duration: 18, completed: false },
       { id: 'lesson-4', number: 4, title: 'Frameworks Overview', duration: 14, completed: false },
@@ -244,7 +244,7 @@ export function LessonContent({ moduleId, lessonId }: LessonContentProps) {
             <p className="text-sm text-muted-foreground leading-relaxed">
               In this lesson, you will learn the key concepts and techniques related to{' '}
               {currentLesson.title.toLowerCase()}. We will walk through practical examples,
-              explore best practices, and build real components using the PromptShip AI generator.
+              explore best practices, and build real components using the Promtify AI generator.
               By the end of this lesson, you will be able to confidently apply these skills in your own projects.
             </p>
           </div>

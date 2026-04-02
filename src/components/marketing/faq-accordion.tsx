@@ -9,14 +9,14 @@ import {
 
 const faqItems = [
   {
-    question: "What is PromptShip?",
+    question: "What is Promtify?",
     answer:
-      "PromptShip is a curated library of 100+ UI prompts paired with AI-powered code generation. It helps developers build beautiful, production-ready interfaces in minutes instead of hours - across React, Flutter, HTML, and Vue.",
+      "Promtify is a curated library of 100+ UI prompts paired with AI-powered code generation. It helps developers build beautiful, production-ready interfaces in minutes instead of hours - across React, Flutter, HTML, and Vue.",
   },
   {
     question: "What frameworks are supported?",
     answer:
-      "PromptShip currently supports React (with Tailwind CSS), Flutter (Dart), plain HTML/CSS, and Vue.js. Each prompt generates framework-specific, idiomatic code that follows best practices for the chosen framework.",
+      "Promtify currently supports React (with Tailwind CSS), Flutter (Dart), plain HTML/CSS, and Vue.js. Each prompt generates framework-specific, idiomatic code that follows best practices for the chosen framework.",
   },
   {
     question: "How does AI generation work?",
@@ -60,7 +60,7 @@ export function FAQAccordion() {
             <span className="gradient-text">questions</span>
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-muted-foreground">
-            Everything you need to know about PromptShip.
+            Everything you need to know about Promtify.
           </p>
         </div>
 

@@ -1,10 +1,22 @@
-import { Rocket, Sparkles, Zap, Code } from 'lucide-react';
+import { redirect } from 'next/navigation';
+import Image from 'next/image';
+import { Sparkles, Zap, Code, Layers } from 'lucide-react';
+import { getSession } from '@/lib/auth/session';
+import { getRedirectUrl } from '@/lib/auth/redirect';
 
-export default function AuthLayout({
+export default async function AuthLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  // If the user already has a valid session, send them to the right place.
+  // This prevents the redirect loop caused by stale tokens that the proxy
+  // detects but the DB no longer recognises.
+  const session = await getSession();
+  if (session) {
+    redirect(getRedirectUrl(session.user as { role?: string }));
+  }
+
   return (
     <div className="flex min-h-screen">
       {/* Left panel - branding */}
@@ -26,10 +38,8 @@ export default function AuthLayout({
         {/* Logo */}
         <div className="relative z-10">
           <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-cyan-500 p-2">
-              <Rocket className="size-6 text-white" />
-            </div>
-            <span className="text-2xl font-bold text-white">PromptShip</span>
+            <Image src="/logo.svg" alt="Promtify" width={32} height={32} />
+            <span className="text-2xl font-bold text-white">Promtify</span>
           </div>
         </div>
 
@@ -53,7 +63,7 @@ export default function AuthLayout({
               { icon: Sparkles, text: 'AI-Powered Generation' },
               { icon: Code, text: '4 Frameworks Supported' },
               { icon: Zap, text: 'Production-Ready Code' },
-              { icon: Rocket, text: '10+ Premium Templates' },
+              { icon: Layers, text: '10+ Premium Templates' },
             ].map((item) => (
               <div
                 key={item.text}
@@ -70,7 +80,7 @@ export default function AuthLayout({
         <div className="relative z-10">
           <blockquote className="border-l-2 border-purple-400/50 pl-4">
             <p className="text-sm italic text-white/50">
-              &ldquo;PromptShip completely changed how I build UIs. What used to
+              &ldquo;Promtify completely changed how I build UIs. What used to
               take hours now takes minutes.&rdquo;
             </p>
             <footer className="mt-2 text-xs text-white/30">

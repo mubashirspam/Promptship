@@ -34,7 +34,7 @@ export default function DocsPage() {
       <div className="container mx-auto px-4">
         <h1 className="text-4xl font-bold mb-4">Documentation</h1>
         <p className="text-muted-foreground mb-12">
-          Everything you need to know about PromptShip.
+          Everything you need to know about Promtify.
         </p>
         <div className="grid gap-6 md:grid-cols-3">
           {sections.map(({ title, description, href, icon: Icon }) => (

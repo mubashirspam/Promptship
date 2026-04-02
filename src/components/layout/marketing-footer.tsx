@@ -23,9 +23,9 @@ const footerLinks = {
 };
 
 const socialLinks = [
-  { title: 'Twitter', href: 'https://twitter.com/promptship' },
-  { title: 'GitHub', href: 'https://github.com/promptship' },
-  { title: 'Discord', href: 'https://discord.gg/promptship' },
+  { title: 'Twitter', href: 'https://twitter.com/promtify' },
+  { title: 'GitHub', href: 'https://github.com/promtify' },
+  { title: 'Discord', href: 'https://discord.gg/promtify' },
 ];
 
 export function MarketingFooter() {
@@ -79,7 +79,7 @@ export function MarketingFooter() {
 
         <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
           <p className="text-xs text-muted-foreground">
-            &copy; {new Date().getFullYear()} PromptShip. All rights reserved.
+            &copy; {new Date().getFullYear()} Promtify. All rights reserved.
           </p>
         </div>
       </div>

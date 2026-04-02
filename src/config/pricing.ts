@@ -1,7 +1,7 @@
 export const pricingPlans = {
   starter: {
     name: 'Starter',
-    description: 'Perfect for trying out PromptShip',
+    description: 'Perfect for trying out Promtify',
     priceINR: 499,
     priceUSD: 9,
     isOneTime: true,

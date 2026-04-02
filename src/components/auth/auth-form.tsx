@@ -26,7 +26,7 @@ export function AuthForm() {
         <>
           {/* Regular user login */}
           <div className="mb-8">
-            <h1 className="text-2xl font-bold tracking-tight">Welcome to PromptShip</h1>
+            <h1 className="text-2xl font-bold tracking-tight">Welcome to Promtify</h1>
             <p className="mt-1 text-sm text-muted-foreground">
               Sign in with your Google or GitHub account to get started
             </p>

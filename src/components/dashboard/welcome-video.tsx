@@ -12,7 +12,7 @@ interface WelcomeVideoProps {
 }
 
 export function WelcomeVideo({
-  title = 'Welcome to PromptShip',
+  title = 'Welcome to Promtify',
   subtitle = 'Before You Start',
   duration = '10:47',
   className,
