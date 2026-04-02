@@ -1,8 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
+import { ArrowLeft, ChevronLeft, ChevronRight, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Logo } from '@/components/shared/logo';
 import { Button } from '@/components/ui/button';
@@ -10,10 +10,17 @@ import { Separator } from '@/components/ui/separator';
 import { adminNavigation } from '@/config/navigation';
 import { siteConfig } from '@/config/site';
 import { useUIStore } from '@/stores/ui-store';
+import { authClient } from '@/lib/auth/client';
 
 export function AdminSidebar() {
   const rawPathname = usePathname();
+  const router = useRouter();
   const { sidebarOpen, toggleSidebar } = useUIStore();
+
+  async function handleLogout() {
+    await authClient.signOut();
+    router.push(`${siteConfig.appUrl}/login`);
+  }
 
   // Strip /admin prefix so nav hrefs (/, /prompts, /users) match correctly
   const pathname = rawPathname.replace(/^\/admin/, '') || '/';
@@ -93,6 +100,17 @@ export function AdminSidebar() {
           <ArrowLeft className="size-4 shrink-0" />
           {sidebarOpen && <span>Back to App</span>}
         </a>
+
+        <button
+          onClick={handleLogout}
+          className={cn(
+            'mt-1 flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive',
+            !sidebarOpen && 'justify-center px-2'
+          )}
+        >
+          <LogOut className="size-4 shrink-0" />
+          {sidebarOpen && <span>Log Out</span>}
+        </button>
       </div>
     </aside>
   );
