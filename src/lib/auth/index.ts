@@ -13,7 +13,7 @@ const sql = neon(process.env.DATABASE_URL!);
 const authDb = drizzle(sql);
 
 export const auth = betterAuth({
-  baseURL: process.env.BETTER_AUTH_URL || `${protocol}://${rootDomain}`,
+  baseURL: process.env.BETTER_AUTH_URL || `${protocol}://app.${rootDomain}`,
   trustedOrigins: [
     `${protocol}://${rootDomain}`,
     `${protocol}://app.${rootDomain}`,
