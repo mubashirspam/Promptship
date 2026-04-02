@@ -91,7 +91,12 @@ export default async function AuthLayout({
       </div>
 
       {/* Right panel - form */}
-      <div className="flex w-full items-center justify-center px-6 py-12 lg:w-1/2">
+      <div className="flex w-full flex-col items-center justify-center px-6 py-12 lg:w-1/2">
+        {/* Logo — visible only on mobile (left panel is hidden on small screens) */}
+        <div className="mb-8 flex items-center gap-2 lg:hidden">
+          <Image src="/logo.svg" alt="Promtify" width={28} height={28} />
+          <span className="text-xl font-bold">Promtify</span>
+        </div>
         {children}
       </div>
     </div>

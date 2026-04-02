@@ -34,14 +34,18 @@ function SocialButtonsSkeleton() {
 function SocialButtonsContent() {
   const [loadingProvider, setLoadingProvider] = useState<string | null>(null);
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
+  const rawCallback = searchParams.get('callbackUrl') || '/dashboard';
+  // Must be absolute — better-auth validates callbackURL against trustedOrigins
+  const callbackUrl = rawCallback.startsWith('http')
+    ? rawCallback
+    : `${typeof window !== 'undefined' ? window.location.origin : ''}${rawCallback}`;
 
   async function handleSocial(provider: 'google' | 'github') {
     setLoadingProvider(provider);
     try {
-      await authClient.signIn.social({ 
-        provider, 
-        callbackURL: callbackUrl 
+      await authClient.signIn.social({
+        provider,
+        callbackURL: callbackUrl
       });
     } catch {
       setLoadingProvider(null);
