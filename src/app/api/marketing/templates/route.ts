@@ -16,6 +16,8 @@ export async function GET() {
         frameworks: prompts.frameworks,
         copyCount: prompts.copyCount,
         isFeatured: prompts.isFeatured,
+        previewImageUrl: prompts.previewImageUrl,
+        previewVideoUrl: prompts.previewVideoUrl,
         categoryName: categories.name,
         categorySlug: categories.slug,
       })

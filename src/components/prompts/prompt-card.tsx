@@ -51,6 +51,18 @@ const frameworkColors: Record<string, string> = {
   vue: '#4FC08D',
 };
 
+function isVideoUrl(url: string | null | undefined): boolean {
+  if (!url) return false;
+  return (
+    url.includes(".mp4") ||
+    url.includes(".webm") ||
+    url.includes(".m3u8") ||
+    url.includes(".ogv") ||
+    url.includes("stream.mux.com") ||
+    url.includes("cloudfront.net")
+  );
+}
+
 const gradientPlaceholders = [
   'from-violet-500 to-purple-500',
   'from-blue-500 to-cyan-500',
@@ -109,34 +121,43 @@ export function PromptCard({
       )}
       onClick={() => onSelect?.(prompt)}
     >
-      {/* Preview area with gradient */}
+      {/* Preview area */}
       <div className="relative aspect-[16/10] w-full overflow-hidden rounded-t-xl">
-        {prompt.previewVideoUrl ? (
-          <video
-            src={prompt.previewVideoUrl}
-            autoPlay
-            loop
-            muted
-            playsInline
-            className="size-full object-cover transition-transform group-hover:scale-105"
-            poster={prompt.previewImageUrl || undefined}
-          />
-        ) : prompt.previewImageUrl ? (
-          <img
-            src={prompt.previewImageUrl}
-            alt={prompt.title}
-            className="size-full object-cover transition-transform group-hover:scale-105"
-          />
-        ) : (
-          <div
-            className={cn(
-              'flex size-full items-center justify-center bg-gradient-to-br',
-              getGradient(prompt.id)
-            )}
-          >
-            <Sparkles className="size-8 text-white/60" />
-          </div>
-        )}
+        {(() => {
+          // Pick best media source — both fields can hold video URLs
+          const mediaSrc = prompt.previewVideoUrl || prompt.previewImageUrl;
+          if (!mediaSrc) {
+            return (
+              <div
+                className={cn(
+                  'flex size-full items-center justify-center bg-gradient-to-br',
+                  getGradient(prompt.id)
+                )}
+              >
+                <Sparkles className="size-8 text-white/60" />
+              </div>
+            );
+          }
+          if (isVideoUrl(mediaSrc)) {
+            return (
+              <video
+                src={mediaSrc}
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="size-full object-cover transition-transform group-hover:scale-105"
+              />
+            );
+          }
+          return (
+            <img
+              src={mediaSrc}
+              alt={prompt.title}
+              className="size-full object-cover transition-transform group-hover:scale-105"
+            />
+          );
+        })()}
 
         {/* Tier badge - top right */}
         <Badge
