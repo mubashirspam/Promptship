@@ -1,4 +1,4 @@
-import { HeroSection } from '@/components/marketing/hero-section';
+import { ParallaxHero } from '@/components/marketing/parallax-hero';
 import { StatsSection } from '@/components/marketing/stats-section';
 import { FeaturesGrid } from '@/components/marketing/features-grid';
 import { TemplateShowcase } from '@/components/marketing/template-showcase';
@@ -11,10 +11,22 @@ import { CTASection } from '@/components/marketing/cta-section';
 export default function HomePage() {
   return (
     <>
-      <HeroSection />
-      <div id="templates">
+      {/*
+        200vh container — hero moves at 50% scroll speed inside it.
+        Hero fully exits the viewport after 200vh of scrolling.
+      */}
+      <ParallaxHero />
+
+      {/*
+        Pull the template section up so it starts 50px below
+        the hero bottom (100vh - 50px from page top).
+        -mt-[calc(100vh+50px)] = 200vh container - (100vh - 50px).
+      */}
+      <div className="relative z-10 -mt-[calc(100vh+50px)]" id="templates">
         <TemplateShowcase />
       </div>
+
+      {/* Remaining sections — fully outside the parallax zone, no overlap */}
       <StatsSection />
       <FeaturesGrid />
       <HowItWorks />
