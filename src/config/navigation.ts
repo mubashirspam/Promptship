@@ -13,9 +13,9 @@ import {
   BookOpen,
   CreditCard,
   Package,
+  Store,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-import type { Tier } from '@/lib/utils/constants';
 
 // ─── App portal (app.promtify.dev) ───────────────────────────
 
@@ -23,8 +23,9 @@ export interface NavItem {
   title: string;
   href: string;
   icon: LucideIcon;
-  tier: Tier | 'all';
   badge?: string;
+  /** true = surfaced in the sidebar but routes to a coming-soon screen */
+  comingSoon?: boolean;
 }
 
 export const appNavigation: NavItem[] = [
@@ -32,39 +33,41 @@ export const appNavigation: NavItem[] = [
     title: 'Home',
     href: '/dashboard',
     icon: Home,
-    tier: 'all',
   },
   {
     title: 'Prompts',
     href: '/prompts',
     icon: FileText,
-    tier: 'all',
     badge: '100+',
-  },
-  {
-    title: 'Generate',
-    href: '/generate',
-    icon: Sparkles,
-    tier: 'pro',
-  },
-  {
-    title: 'Learn',
-    href: '/learn',
-    icon: GraduationCap,
-    tier: 'pro',
   },
   {
     title: 'Templates',
     href: '/templates',
     icon: Layout,
-    tier: 'starter',
     badge: 'NEW',
+  },
+  {
+    title: 'Courses',
+    href: '/learn',
+    icon: GraduationCap,
+    comingSoon: true,
+  },
+  {
+    title: 'Generate',
+    href: '/generate',
+    icon: Sparkles,
+    comingSoon: true,
+  },
+  {
+    title: 'Marketplace',
+    href: '/marketplace',
+    icon: Store,
+    comingSoon: true,
   },
   {
     title: 'History',
     href: '/history',
     icon: History,
-    tier: 'all',
   },
 ];
 
@@ -72,7 +75,6 @@ export const upgradeItem: NavItem = {
   title: 'Premium',
   href: '/upgrade',
   icon: Gem,
-  tier: 'all',
   badge: 'Upgrade',
 };
 
@@ -80,7 +82,6 @@ export const settingsItem: NavItem = {
   title: 'Settings',
   href: '/settings',
   icon: Settings,
-  tier: 'all',
 };
 
 // ─── Admin portal (admin.promtify.dev) ───────────────────────
@@ -98,9 +99,19 @@ export const adminNavigation = [
     icon: FileText,
   },
   {
+    title: 'Categories',
+    href: '/categories',
+    icon: Package,
+  },
+  {
     title: 'Users',
     href: '/users',
     icon: Users,
+  },
+  {
+    title: 'Plans & Pricing',
+    href: '/plans',
+    icon: CreditCard,
   },
   {
     title: 'Blog',
@@ -134,5 +145,4 @@ export const marketingNavigation = [
   { title: 'Features', href: '/#features' },
   { title: 'Pricing', href: '/pricing' },
   { title: 'Blog', href: '/blog' },
-  { title: 'Docs', href: '/docs' },
 ];

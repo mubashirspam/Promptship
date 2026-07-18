@@ -28,7 +28,6 @@ export async function GET(request: NextRequest) {
           title: prompts.title,
           slug: prompts.slug,
           description: prompts.description,
-          tier: prompts.tier,
           frameworks: prompts.frameworks,
           usageCount: prompts.usageCount,
           copyCount: prompts.copyCount,
@@ -80,9 +79,15 @@ export async function POST(request: NextRequest) {
       description,
       promptText,
       categoryId,
-      tier = 'free',
       frameworks = ['react'],
       previewImageUrl,
+      previewVideoUrl,
+      thumbnailUrl,
+      assetKind = 'ai_prompt',
+      templateType = 'component',
+      platform = 'web',
+      isFree = false,
+      assetUrl,
       isFeatured = false,
       isPublished = true,
     } = body;
@@ -90,6 +95,24 @@ export async function POST(request: NextRequest) {
     if (!title || !slug || !promptText) {
       return NextResponse.json(
         { success: false, error: { code: 'VALIDATION', message: 'title, slug, and promptText are required' } },
+        { status: 400 }
+      );
+    }
+    if (!['ai_prompt', 'figma', 'code'].includes(assetKind)) {
+      return NextResponse.json(
+        { success: false, error: { code: 'VALIDATION', message: 'Invalid assetKind' } },
+        { status: 400 }
+      );
+    }
+    if (!['full', 'component'].includes(templateType)) {
+      return NextResponse.json(
+        { success: false, error: { code: 'VALIDATION', message: 'templateType must be "full" or "component"' } },
+        { status: 400 }
+      );
+    }
+    if (!['web', 'mobile', 'universal'].includes(platform)) {
+      return NextResponse.json(
+        { success: false, error: { code: 'VALIDATION', message: 'platform must be web, mobile or universal' } },
         { status: 400 }
       );
     }
@@ -102,9 +125,15 @@ export async function POST(request: NextRequest) {
         description,
         promptText,
         categoryId: categoryId || null,
-        tier,
         frameworks,
-        previewImageUrl,
+        previewImageUrl: previewImageUrl || null,
+        previewVideoUrl: previewVideoUrl || null,
+        thumbnailUrl: thumbnailUrl || null,
+        assetKind,
+        templateType,
+        platform,
+        isFree: Boolean(isFree),
+        assetUrl: assetUrl || null,
         isFeatured,
         isPublished,
       })

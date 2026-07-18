@@ -1,19 +1,31 @@
 'use client';
 
 import { useState } from 'react';
-import { Copy, Check, Sparkles, Heart, Lock } from 'lucide-react';
+import { Copy, Check, Sparkles, Heart, Lock, Unlock, BadgeCheck, Download, ExternalLink, Loader2 } from 'lucide-react';
+import { openTemplateFigma, downloadTemplateZip } from '@/lib/template-asset';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { FRAMEWORK_META, type Framework } from '@/lib/utils/constants';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+
+export type AssetKind = 'figma' | 'ai_prompt' | 'code';
 
 export interface Prompt {
   id: string;
   title: string;
   description: string | null;
-  promptText: string;
-  tier: 'free' | 'starter' | 'pro' | 'team';
+  /** null when the viewer has no access to this paid template */
+  promptText: string | null;
+  isFree?: boolean;
+  hasAccess?: boolean;
+  /** figma | ai_prompt | code — the template kind */
+  assetKind?: AssetKind | string | null;
+  /** full = complete website/app · component = single section */
+  templateType?: 'full' | 'component' | string | null;
+  /** web | mobile | universal */
+  platform?: string | null;
   frameworks: string[];
   categoryName: string;
   previewImageUrl: string | null;
@@ -31,25 +43,14 @@ interface PromptCardProps {
   className?: string;
 }
 
-const tierConfig: Record<
-  Prompt['tier'],
-  { label: string; className: string }
-> = {
-  free: { label: 'FREE', className: 'bg-emerald-500/10 text-emerald-500' },
-  starter: {
-    label: 'STARTER',
-    className: 'bg-blue-500/10 text-blue-500',
-  },
-  pro: { label: 'PRO', className: 'bg-purple-500/10 text-purple-500' },
-  team: { label: 'TEAM', className: 'bg-amber-500/10 text-amber-500' },
+export const assetKindLabels: Record<string, string> = {
+  figma: 'Figma Kit',
+  ai_prompt: 'AI Prompt',
+  code: 'Code Starter',
 };
 
-const frameworkColors: Record<string, string> = {
-  react: '#61DAFB',
-  flutter: '#02569B',
-  html: '#E34F26',
-  vue: '#4FC08D',
-};
+const frameworkColor = (fw: string) =>
+  FRAMEWORK_META[fw as Framework]?.color ?? '#888';
 
 function isVideoUrl(url: string | null | undefined): boolean {
   if (!url) return false;
@@ -88,9 +89,14 @@ export function PromptCard({
   className,
 }: PromptCardProps) {
   const [copied, setCopied] = useState(false);
+  const [fetchingAsset, setFetchingAsset] = useState(false);
+
+  const locked = prompt.hasAccess === false;
+  const kind = prompt.assetKind ?? 'ai_prompt';
 
   async function handleCopy(e: React.MouseEvent) {
     e.stopPropagation();
+    if (!prompt.promptText) return;
     try {
       await navigator.clipboard.writeText(prompt.promptText);
       setCopied(true);
@@ -98,6 +104,22 @@ export function PromptCard({
       setTimeout(() => setCopied(false), 2000);
     } catch {
       toast.error('Failed to copy prompt');
+    }
+  }
+
+  function handleUnlock(e: React.MouseEvent) {
+    e.stopPropagation();
+    window.location.href = `/upgrade?product=template:${prompt.id}`;
+  }
+
+  async function handleAsset(e: React.MouseEvent) {
+    e.stopPropagation();
+    setFetchingAsset(true);
+    try {
+      if (kind === 'figma') await openTemplateFigma(prompt.id);
+      else await downloadTemplateZip(prompt.id);
+    } finally {
+      setFetchingAsset(false);
     }
   }
 
@@ -110,8 +132,6 @@ export function PromptCard({
     e.stopPropagation();
     onFavorite?.(prompt);
   }
-
-  const tier = tierConfig[prompt.tier];
 
   return (
     <Card
@@ -159,39 +179,69 @@ export function PromptCard({
           );
         })()}
 
-        {/* Tier badge - top right */}
-        <Badge
-          variant="secondary"
-          className={cn('absolute top-2 right-2 border-0', tier.className)}
-        >
-          {prompt.tier !== 'free' && <Lock className="size-3" />}
-          {tier.label}
-        </Badge>
-
-        {/* Generate button on hover */}
-        <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
-          <Button size="sm" onClick={handleGenerate}>
-            <Sparkles className="size-3.5" />
-            Generate
-          </Button>
+        {/* Access chip — glass effect, top right */}
+        <div className="absolute top-2.5 right-2.5">
+          {prompt.isFree ? (
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-[11px] font-semibold text-white shadow-sm ring-1 ring-white/25 backdrop-blur-md">
+              <Unlock className="size-3 text-emerald-400" />
+              Free
+            </span>
+          ) : locked ? (
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-black/30 px-3 py-1 text-[11px] font-semibold text-white shadow-sm ring-1 ring-white/20 backdrop-blur-md">
+              <Lock className="size-3 text-amber-400" />
+              Locked
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-[11px] font-semibold text-white shadow-sm ring-1 ring-white/25 backdrop-blur-md">
+              <BadgeCheck className="size-3 text-emerald-400" />
+              Owned
+            </span>
+          )}
         </div>
+
+        {/* Generate on hover — only meaningful for unlocked AI prompts */}
+        {kind === 'ai_prompt' && !locked && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
+            <Button size="sm" onClick={handleGenerate}>
+              <Sparkles className="size-3.5" />
+              Generate
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Content */}
       <CardContent className="flex flex-col gap-2">
         <h3 className="line-clamp-1 font-medium">{prompt.title}</h3>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-1.5">
           <Badge variant="outline" className="text-xs">
             {prompt.categoryName}
           </Badge>
-          <div className="flex items-center gap-1">
+          {prompt.templateType && (
+            <Badge
+              variant="secondary"
+              className={cn(
+                'border-0 text-xs',
+                prompt.templateType === 'full'
+                  ? 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400'
+                  : 'bg-violet-500/10 text-violet-600 dark:text-violet-400'
+              )}
+            >
+              {prompt.templateType === 'full'
+                ? prompt.platform === 'mobile'
+                  ? 'Full app'
+                  : 'Full site'
+                : 'Component'}
+            </Badge>
+          )}
+          <div className="ml-auto flex items-center gap-1">
             {prompt.frameworks.map((fw) => (
               <span
                 key={fw}
                 className="size-2.5 rounded-full"
                 style={{
-                  backgroundColor: frameworkColors[fw] ?? '#888',
+                  backgroundColor: frameworkColor(fw),
                 }}
                 title={fw.charAt(0).toUpperCase() + fw.slice(1)}
               />
@@ -206,21 +256,67 @@ export function PromptCard({
         )}
       </CardContent>
 
-      {/* Actions */}
+      {/* Actions — per kind; locked templates get an Unlock CTA only */}
       <CardFooter className="gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          className="flex-1"
-          onClick={handleCopy}
-        >
-          {copied ? (
-            <Check className="size-3.5" />
-          ) : (
-            <Copy className="size-3.5" />
-          )}
-          {copied ? 'Copied!' : 'Copy'}
-        </Button>
+        {locked ? (
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex-1 border-amber-500/40 text-amber-600 hover:bg-amber-500/10 dark:text-amber-500"
+            onClick={handleUnlock}
+          >
+            <Lock className="size-3.5" />
+            Unlock
+          </Button>
+        ) : (
+          <>
+            {/* Figma Kits open the file link; Code Starters download the zip */}
+            {(kind === 'figma' || kind === 'code') && (
+              <Button
+                variant="default"
+                size="sm"
+                className="flex-1"
+                disabled={fetchingAsset}
+                onClick={handleAsset}
+              >
+                {fetchingAsset ? (
+                  <Loader2 className="size-3.5 animate-spin" />
+                ) : kind === 'figma' ? (
+                  <>
+                    <ExternalLink className="size-3.5" />
+                    Figma
+                  </>
+                ) : (
+                  <>
+                    <Download className="size-3.5" />
+                    Download
+                  </>
+                )}
+              </Button>
+            )}
+            {/* Copy prompt whenever prompt content exists */}
+            {prompt.promptText && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1"
+                onClick={handleCopy}
+              >
+                {copied ? (
+                  <>
+                    <Check className="size-3.5" />
+                    Copied!
+                  </>
+                ) : (
+                  <>
+                    <Copy className="size-3.5" />
+                    Copy
+                  </>
+                )}
+              </Button>
+            )}
+          </>
+        )}
         <Button
           variant="ghost"
           size="icon-sm"

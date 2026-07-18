@@ -12,7 +12,7 @@ export async function GET() {
         title: prompts.title,
         slug: prompts.slug,
         description: prompts.description,
-        tier: prompts.tier,
+        isFree: prompts.isFree,
         frameworks: prompts.frameworks,
         copyCount: prompts.copyCount,
         isFeatured: prompts.isFeatured,

@@ -21,7 +21,7 @@ export default async function EditPromptPage({ params }: EditPromptPageProps) {
   const [promptResult, allCategories] = await Promise.all([
     db().select().from(prompts).where(eq(prompts.id, id)).limit(1),
     db()
-      .select({ id: categories.id, name: categories.name, slug: categories.slug })
+      .select({ id: categories.id, name: categories.name, slug: categories.slug, parentId: categories.parentId })
       .from(categories)
       .orderBy(asc(categories.displayOrder)),
   ]);

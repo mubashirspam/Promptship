@@ -1,18 +1,28 @@
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
-import { admin } from 'better-auth/plugins';
+import { admin, twoFactor } from 'better-auth/plugins';
 import { neon } from '@neondatabase/serverless';
 import { drizzle } from 'drizzle-orm/neon-http';
-import { users, sessions, accounts, verifications } from '@/lib/db/schema';
+import {
+  users,
+  sessions,
+  accounts,
+  verifications,
+  twoFactors,
+} from '@/lib/db/schema';
 
-const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'localhost:3000';
-const protocol = rootDomain.includes('localhost') ? 'http' : 'https';
+const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'lvh.me:3000';
+// A port in the root domain means local dev over http; real domains are https
+const protocol = rootDomain.includes(':') ? 'http' : 'https';
+// Leading dot shares the session cookie across app./admin. in every environment
+const cookieDomain = '.' + rootDomain.split(':')[0];
 
 // Dedicated db instance for auth to avoid lazy-init issues
 const sql = neon(process.env.DATABASE_URL!);
 const authDb = drizzle(sql);
 
 export const auth = betterAuth({
+  appName: 'Promtify',
   baseURL: process.env.BETTER_AUTH_URL || `${protocol}://app.${rootDomain}`,
   trustedOrigins: [
     `${protocol}://${rootDomain}`,
@@ -26,6 +36,7 @@ export const auth = betterAuth({
       session: sessions,
       account: accounts,
       verification: verifications,
+      twoFactor: twoFactors,
     },
   }),
   emailAndPassword: {
@@ -49,34 +60,44 @@ export const auth = betterAuth({
       maxAge: 60 * 5,
     },
   },
+  rateLimit: {
+    enabled: true,
+    window: 60,
+    max: 60,
+    customRules: {
+      '/sign-in/email': { window: 60, max: 5 },
+      '/sign-up/email': { window: 60, max: 5 },
+    },
+  },
   advanced: {
     cookiePrefix: 'ps',
     defaultCookieAttributes: {
       sameSite: 'lax',
-      secure: process.env.NODE_ENV === 'production',
-      // Domain must start with . for subdomains to share cookies
-      domain: rootDomain.includes('localhost')
-        ? undefined // localhost doesn't need domain for subdomains
-        : `.${rootDomain}`,
+      secure: protocol === 'https',
+      domain: cookieDomain,
     },
   },
   user: {
     additionalFields: {
-      tier: {
-        type: 'string',
-        defaultValue: 'free',
-      },
+      // input: false — these are set only server-side (scripts, webhooks,
+      // admin APIs) and must never be accepted from signup/update requests
       role: {
         type: 'string',
         defaultValue: 'user',
+        input: false,
       },
       credits: {
         type: 'number',
         defaultValue: 0,
+        input: false,
       },
     },
   },
-  plugins: [admin()],
+  plugins: [
+    admin(),
+    // CLI enrollment (pnpm admin:2fa) — activate immediately on enable
+    twoFactor({ skipVerificationOnEnable: true }),
+  ],
 });
 
 export type Session = typeof auth.$Infer.Session;

@@ -32,6 +32,58 @@ export async function createCheckoutSession({
   });
 }
 
+/**
+ * Product-based checkout with inline price_data — no pre-created Stripe
+ * prices needed while plans are still in flux. metadata carries
+ * userId/productId to the webhook, which grants the entitlements.
+ */
+export async function createProductCheckout({
+  product,
+  userId,
+  successUrl,
+  cancelUrl,
+  customerEmail,
+}: {
+  product: {
+    id: string;
+    name: string;
+    mode: 'payment' | 'subscription';
+    interval?: 'month' | 'year';
+    priceUsdCents: number;
+  };
+  userId: string;
+  successUrl: string;
+  cancelUrl: string;
+  customerEmail?: string;
+}) {
+  const stripe = getStripeClient();
+  const metadata = { userId, productId: product.id };
+  return stripe.checkout.sessions.create({
+    mode: product.mode,
+    payment_method_types: ['card'],
+    line_items: [
+      {
+        quantity: 1,
+        price_data: {
+          currency: 'usd',
+          unit_amount: product.priceUsdCents,
+          product_data: { name: product.name },
+          ...(product.mode === 'subscription' && {
+            recurring: { interval: product.interval ?? 'month' },
+          }),
+        },
+      },
+    ],
+    customer_email: customerEmail,
+    metadata,
+    ...(product.mode === 'subscription' && {
+      subscription_data: { metadata },
+    }),
+    success_url: successUrl,
+    cancel_url: cancelUrl,
+  });
+}
+
 export async function createCustomerPortalSession({
   customerId,
   returnUrl,

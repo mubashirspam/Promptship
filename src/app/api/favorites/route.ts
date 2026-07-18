@@ -23,7 +23,6 @@ export async function GET() {
         prompt: {
           id: prompts.id,
           title: prompts.title,
-          tier: prompts.tier,
           frameworks: prompts.frameworks,
           previewImageUrl: prompts.previewImageUrl,
         },

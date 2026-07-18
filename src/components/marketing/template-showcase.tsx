@@ -7,7 +7,7 @@ import {
   useScroll,
   useTransform,
   type MotionValue,
-} from "framer-motion";
+} from "motion/react";
 import { cn } from "@/lib/utils";
 import {
   Rocket,
@@ -28,7 +28,7 @@ interface Template {
   title: string;
   slug: string;
   description: string;
-  tier: string;
+  isFree: boolean;
   frameworks: string[];
   copyCount: number;
   isFeatured: boolean;
@@ -166,12 +166,12 @@ function TemplateCard({
               <div
                 className={cn(
                   "flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-semibold backdrop-blur-sm transition-opacity",
-                  template.tier === "free" || template.tier === "starter"
+                  template.isFree
                     ? "bg-white/15 text-white group-hover:bg-white/25"
                     : "bg-white/10 text-white/60"
                 )}
               >
-                {template.tier === "free" || template.tier === "starter" ? (
+                {template.isFree ? (
                   <>
                     <Copy className="size-3" />
                     Copy

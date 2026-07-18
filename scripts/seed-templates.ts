@@ -23,7 +23,7 @@ interface TemplateFrontmatter {
   slug: string;
   category: string;
   description: string;
-  tier: 'free' | 'starter' | 'pro' | 'team';
+  tier: 'free' | 'starter' | 'pro' | 'team'; // legacy frontmatter field → mapped to isFree
   frameworks: string[];
   isPremium?: boolean;
   isFeatured?: boolean;
@@ -109,7 +109,7 @@ async function seedTemplate(filePath: string, db: Database) {
     promptText: shortPrompt,
     detailedPrompt: markdownContent,
     templateType: frontmatter.isPremium ? 'premium' : 'detailed',
-    tier: frontmatter.tier,
+    isFree: frontmatter.tier === 'free',
     frameworks: frontmatter.frameworks,
     isPremium: frontmatter.isPremium || false,
     isFeatured: frontmatter.isFeatured || false,

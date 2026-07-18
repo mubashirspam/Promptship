@@ -1,31 +1,31 @@
 import Link from 'next/link';
 import { Logo } from '@/components/shared/logo';
 import { Separator } from '@/components/ui/separator';
+import { siteConfig } from '@/config/site';
 
 const footerLinks = {
   Product: [
     { title: 'Features', href: '/#features' },
     { title: 'Pricing', href: '/pricing' },
     { title: 'Changelog', href: '/changelog' },
-    { title: 'Docs', href: '/docs' },
   ],
   Company: [
     { title: 'About', href: '/about' },
     { title: 'Blog', href: '/blog' },
-    { title: 'Careers', href: '/careers' },
     { title: 'Contact', href: '/contact' },
   ],
   Legal: [
     { title: 'Privacy', href: '/privacy' },
     { title: 'Terms', href: '/terms' },
-    { title: 'Cookies', href: '/cookies' },
   ],
 };
 
 const socialLinks = [
-  { title: 'Twitter', href: 'https://twitter.com/promtify' },
-  { title: 'GitHub', href: 'https://github.com/promtify' },
-  { title: 'Discord', href: 'https://discord.gg/promtify' },
+  { title: 'X', href: siteConfig.links.x },
+  { title: 'GitHub', href: siteConfig.links.github },
+  { title: 'Discord', href: siteConfig.links.discord },
+  { title: 'Bluesky', href: siteConfig.links.bluesky },
+  { title: 'LinkedIn', href: siteConfig.links.linkedin },
 ];
 
 export function MarketingFooter() {
@@ -37,10 +37,10 @@ export function MarketingFooter() {
           <div className="lg:col-span-2">
             <Logo />
             <p className="mt-3 max-w-xs text-sm text-muted-foreground">
-              Craft, organize, and ship better prompts. The all-in-one platform
-              for prompt engineering.
+              Premium Figma Kits, AI Prompts and Code Starters. Pay once, own
+              it forever.
             </p>
-            <div className="mt-4 flex gap-4">
+            <div className="mt-4 flex flex-wrap gap-4">
               {socialLinks.map((link) => (
                 <a
                   key={link.href}

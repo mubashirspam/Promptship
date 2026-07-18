@@ -1,29 +1,59 @@
 import { neon } from '@neondatabase/serverless';
 import { drizzle } from 'drizzle-orm/neon-http';
 import { users, accounts } from '@/lib/db/schema';
-import * as bcrypt from 'bcryptjs';
+import { hashPassword } from 'better-auth/crypto';
 
-const sql = neon(process.env.DATABASE_URL!);
-const db = drizzle(sql);
+/**
+ * Creates (or resets) the admin account in the env-selected database.
+ * This is the ONLY way admins are provisioned — there is no admin-creation
+ * surface in the deployed app.
+ *
+ *   pnpm admin:create              → local/staging DB (DATABASE_URL)
+ *   pnpm admin:create:production   → production DB (DATABASE_URL_PRODUCTION)
+ *
+ * Credentials come from .env.local: ADMIN_EMAIL + ADMIN_PASSWORD_STAGING /
+ * ADMIN_PASSWORD_PRODUCTION (ADMIN_PASSWORD overrides both if set).
+ */
+
+const env = (process.env.NODE_ENV as string) || 'development';
+
+const databaseUrl =
+  env === 'production'
+    ? process.env.DATABASE_URL_PRODUCTION
+    : env === 'staging'
+      ? process.env.DATABASE_URL_STAGING
+      : process.env.DATABASE_URL;
+
+const adminEmail = process.env.ADMIN_EMAIL;
+const adminPassword =
+  process.env.ADMIN_PASSWORD ||
+  (env === 'production'
+    ? process.env.ADMIN_PASSWORD_PRODUCTION
+    : process.env.ADMIN_PASSWORD_STAGING);
 
 async function createAdmin() {
-  const adminEmail = 'admin@promtify.dev';
-  const adminPassword = 'Admin@123'; // Change this after first login
-  const adminName = 'Admin User';
+  if (!databaseUrl) throw new Error(`No database URL configured for env "${env}"`);
+  if (!adminEmail || !adminPassword) {
+    throw new Error(
+      'Set ADMIN_EMAIL and ADMIN_PASSWORD_STAGING / ADMIN_PASSWORD_PRODUCTION in .env.local'
+    );
+  }
+  if (adminPassword.length < 12) throw new Error('Admin password must be at least 12 characters');
 
-  console.log('Creating admin account...');
+  const db = drizzle(neon(databaseUrl));
 
-  // Hash password
-  const hashedPassword = await bcrypt.hash(adminPassword, 10);
+  console.log(`Creating admin account in ${env} database...`);
 
-  // Create or update admin user
+  // better-auth verifies credentials with its own scrypt format — must use
+  // its hasher, not bcrypt, or login will always fail
+  const hashedPassword = await hashPassword(adminPassword);
+
   const [adminUser] = await db
     .insert(users)
     .values({
       email: adminEmail,
-      name: adminName,
+      name: 'Admin',
       role: 'admin',
-      tier: 'pro',
       credits: 10000,
       emailVerified: true,
     })
@@ -31,18 +61,13 @@ async function createAdmin() {
       target: users.email,
       set: {
         role: 'admin',
-        tier: 'pro',
-        credits: 10000,
         emailVerified: true,
         updatedAt: new Date(),
       },
     })
     .returning();
 
-  console.log('Admin user created:', adminUser);
-
-  // Create or update admin account credentials
-  const [adminAccount] = await db
+  await db
     .insert(accounts)
     .values({
       userId: adminUser.id,
@@ -56,21 +81,13 @@ async function createAdmin() {
         password: hashedPassword,
         updatedAt: new Date(),
       },
-    })
-    .returning();
+    });
 
-  console.log('Admin account created:', adminAccount);
-  console.log('\n✅ Admin account ready!');
-  console.log(`Email: ${adminEmail}`);
-  console.log(`Password: ${adminPassword}`);
-  console.log('\n⚠️  Please change the password after first login!');
+  console.log(`✅ Admin ready in ${env}: ${adminEmail} (password from .env.local)`);
 }
 
 createAdmin()
-  .then(() => {
-    console.log('\n✅ Done!');
-    process.exit(0);
-  })
+  .then(() => process.exit(0))
   .catch((error) => {
     console.error('Error creating admin:', error);
     process.exit(1);

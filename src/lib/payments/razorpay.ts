@@ -26,6 +26,22 @@ export async function createSubscription({
   } as Parameters<typeof razorpay.subscriptions.create>[0]);
 }
 
+/** One-time INR order — the client opens Razorpay Checkout with this order id. */
+export async function createOrder({
+  amountPaise,
+  notes,
+}: {
+  amountPaise: number;
+  notes: Record<string, string>;
+}) {
+  const razorpay = getRazorpayClient();
+  return razorpay.orders.create({
+    amount: amountPaise,
+    currency: 'INR',
+    notes,
+  });
+}
+
 export function verifyWebhookSignature(
   body: string,
   signature: string

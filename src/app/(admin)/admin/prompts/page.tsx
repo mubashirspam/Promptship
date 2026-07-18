@@ -22,7 +22,7 @@ export default async function AdminPromptsPage() {
         title: prompts.title,
         slug: prompts.slug,
         description: prompts.description,
-        tier: prompts.tier,
+        isFree: prompts.isFree,
         frameworks: prompts.frameworks,
         usageCount: prompts.usageCount,
         copyCount: prompts.copyCount,
@@ -68,7 +68,7 @@ export default async function AdminPromptsPage() {
               <tr className="border-b bg-muted/50">
                 <th className="px-4 py-3 text-left font-medium">Title</th>
                 <th className="px-4 py-3 text-left font-medium hidden md:table-cell">Category</th>
-                <th className="px-4 py-3 text-left font-medium hidden lg:table-cell">Tier</th>
+                <th className="px-4 py-3 text-left font-medium hidden lg:table-cell">Access</th>
                 <th className="px-4 py-3 text-center font-medium hidden lg:table-cell">Uses</th>
                 <th className="px-4 py-3 text-center font-medium">Status</th>
                 <th className="px-4 py-3 text-right font-medium">Actions</th>
@@ -90,8 +90,8 @@ export default async function AdminPromptsPage() {
                     <Badge variant="outline">{p.categoryName ?? 'Uncategorized'}</Badge>
                   </td>
                   <td className="px-4 py-3 hidden lg:table-cell">
-                    <Badge variant={p.tier === 'free' ? 'secondary' : 'default'}>
-                      {p.tier}
+                    <Badge variant={p.isFree ? 'secondary' : 'default'}>
+                      {p.isFree ? 'free' : 'paid'}
                     </Badge>
                   </td>
                   <td className="px-4 py-3 text-center hidden lg:table-cell">

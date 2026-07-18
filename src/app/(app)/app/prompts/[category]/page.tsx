@@ -5,7 +5,7 @@ import { PromptGrid } from '@/components/prompts/prompt-grid';
 import { PromptModal } from '@/components/prompts/prompt-modal';
 import { PromptSearch } from '@/components/prompts/prompt-search';
 import { FrameworkFilter } from '@/components/prompts/framework-filter';
-import { CategoryTabs, CATEGORIES } from '@/components/prompts/category-tabs';
+import { CategoryTabs, useCategories } from '@/components/prompts/category-tabs';
 import type { Prompt } from '@/components/prompts/prompt-card';
 
 // ---------------------------------------------------------------------------
@@ -20,7 +20,7 @@ const MOCK_PROMPTS_BY_CATEGORY: Record<string, Prompt[]> = {
         'A modern hero section with animated gradient background, headline, subtext, and dual CTA buttons.',
       promptText:
         'Create a responsive hero section for a SaaS landing page. Include a large bold headline, supporting subtext, two CTA buttons (primary filled, secondary outlined), and an animated gradient background that shifts between purple and blue.',
-      tier: 'free',
+      isFree: true,
       frameworks: ['react', 'html'],
       categoryName: 'Hero Sections',
       previewImageUrl: null,
@@ -34,7 +34,7 @@ const MOCK_PROMPTS_BY_CATEGORY: Record<string, Prompt[]> = {
         'Hero section featuring a centered phone mockup, app store badges, and feature highlights.',
       promptText:
         'Build a hero section for a mobile app launch page. Center a phone mockup with a screenshot, add app name and tagline above, App Store and Google Play badges below, and three small feature icons with labels underneath.',
-      tier: 'starter',
+      isFree: false,
       frameworks: ['react', 'vue'],
       categoryName: 'Hero Sections',
       previewImageUrl: null,
@@ -50,7 +50,7 @@ const MOCK_PROMPTS_BY_CATEGORY: Record<string, Prompt[]> = {
         'A frosted-glass login form with email/password fields and social login buttons.',
       promptText:
         'Build a glassmorphism-style login card centered on the page. Include email and password inputs with floating labels, a "Remember me" checkbox, "Forgot password?" link, a primary submit button, and social login options for Google and GitHub.',
-      tier: 'free',
+      isFree: true,
       frameworks: ['react', 'vue'],
       categoryName: 'Login/Auth',
       previewImageUrl: null,
@@ -66,7 +66,7 @@ const MOCK_PROMPTS_BY_CATEGORY: Record<string, Prompt[]> = {
         'A full analytics dashboard layout with stat cards, line chart, bar chart, and recent activity feed.',
       promptText:
         'Design an analytics dashboard with a top row of 4 stat cards (revenue, users, orders, conversion rate), a main area split between a line chart and bar chart, and a bottom section with a recent activity feed table.',
-      tier: 'pro',
+      isFree: false,
       frameworks: ['react'],
       categoryName: 'Dashboards',
       previewImageUrl: null,
@@ -88,8 +88,9 @@ export default function CategoryPage(props: CategoryPageProps) {
   const [selectedPrompt, setSelectedPrompt] = useState<Prompt | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
 
-  // Find display label for the category
-  const categoryMeta = CATEGORIES.find((c) => c.slug === category);
+  // Find display label for the category (admin-managed)
+  const categories = useCategories();
+  const categoryMeta = categories.find((c) => c.slug === category);
   const categoryLabel = categoryMeta?.label ?? category.replace(/-/g, ' ');
 
   // Get prompts for this category

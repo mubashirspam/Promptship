@@ -121,7 +121,7 @@ STYLING:
 - Smooth entrance animations (fade + slide up)
 - Hover effects on buttons with subtle scale transform
 - Use CSS grid for layout, flexbox for alignment`,
-      tier: 'free' as const,
+      isFree: true,
       frameworks: ['react', 'html', 'vue'],
       isFeatured: true,
       isPublished: true,
@@ -154,7 +154,7 @@ INTERACTIONS:
 - Intersection Observer for scroll-triggered animations
 - Project grid filter by category (All, Web, Mobile, Branding)
 - Form submission with loading state and success message`,
-      tier: 'free' as const,
+      isFree: true,
       frameworks: ['react', 'html', 'vue'],
       isFeatured: true,
       isPublished: true,
@@ -286,7 +286,7 @@ STYLING:
 - Button hover and loading states
 - Error messages appear below inputs with red text
 - Subtle entrance animation on page load`,
-      tier: 'free' as const,
+      isFree: true,
       frameworks: ['react', 'html', 'vue', 'flutter'],
       isFeatured: true,
       isPublished: true,
@@ -390,7 +390,7 @@ RESPONSIVE:
 - Filters move to slide-out drawer on mobile
 - Grid becomes 2 columns on tablet, 1 on mobile
 - Sticky filter/sort bar on mobile`,
-      tier: 'free' as const,
+      isFree: true,
       frameworks: ['react', 'html', 'vue'],
       isFeatured: true,
       isPublished: true,
@@ -497,7 +497,7 @@ STYLING:
 - Hover effects on cards and buttons
 - Mobile: cards stack vertically, comparison table scrolls horizontally
 - Smooth toggle animation with number counting effect`,
-      tier: 'free' as const,
+      isFree: true,
       frameworks: ['react', 'html', 'vue', 'flutter'],
       isFeatured: true,
       isPublished: true,

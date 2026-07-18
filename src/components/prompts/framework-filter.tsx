@@ -2,7 +2,7 @@
 
 import { cn } from '@/lib/utils';
 import { Filter } from 'lucide-react';
-import { FRAMEWORKS, type Framework } from '@/lib/utils/constants';
+import { FRAMEWORKS, FRAMEWORK_META } from '@/lib/utils/constants';
 import {
   Select,
   SelectContent,
@@ -17,12 +17,7 @@ interface FrameworkFilterProps {
   className?: string;
 }
 
-const frameworkMeta: Record<Framework, { label: string; color: string }> = {
-  react: { label: 'React', color: 'bg-[#61DAFB]' },
-  flutter: { label: 'Flutter', color: 'bg-[#02569B]' },
-  html: { label: 'HTML', color: 'bg-[#E34F26]' },
-  vue: { label: 'Vue', color: 'bg-[#4FC08D]' },
-};
+
 
 export function FrameworkFilter({
   activeFramework,
@@ -42,19 +37,17 @@ export function FrameworkFilter({
       </SelectTrigger>
       <SelectContent>
         <SelectItem value="all">All Frameworks</SelectItem>
-        {FRAMEWORKS.map((fw) => {
-          const meta = frameworkMeta[fw];
-          return (
-            <SelectItem key={fw} value={fw}>
-              <span className="flex items-center gap-2">
-                <span
-                  className={cn('size-2 rounded-full', meta.color)}
-                />
-                {meta.label}
-              </span>
-            </SelectItem>
-          );
-        })}
+        {FRAMEWORKS.map((fw) => (
+          <SelectItem key={fw} value={fw}>
+            <span className="flex items-center gap-2">
+              <span
+                className="size-2 rounded-full"
+                style={{ backgroundColor: FRAMEWORK_META[fw].color }}
+              />
+              {FRAMEWORK_META[fw].label}
+            </span>
+          </SelectItem>
+        ))}
       </SelectContent>
     </Select>
   );

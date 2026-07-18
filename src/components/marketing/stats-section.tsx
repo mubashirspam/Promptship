@@ -1,12 +1,12 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 
 const stats = [
-  { value: "100+", label: "Curated Prompts" },
-  { value: "4", label: "Frameworks" },
-  { value: "10K+", label: "Copies Generated" },
-  { value: "50+", label: "Video Lessons" },
+  { value: "400+", label: "Templates & Components" },
+  { value: "3", label: "Kinds — Figma · Prompt · Code" },
+  { value: "9", label: "Frameworks & Stacks" },
+  { value: "0", label: "Renewals — Pay Once" },
 ] as const;
 
 export function StatsSection() {

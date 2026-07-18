@@ -3,7 +3,8 @@ import { db } from '@/lib/db';
 import { users } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { getSession } from '@/lib/auth/session';
-import { TIER_CREDITS, type Tier } from '@/lib/utils/constants';
+import { getEntitlements, derivePlan } from '@/lib/access';
+import { PLAN_CREDITS } from '@/lib/utils/constants';
 
 export async function GET() {
   try {
@@ -15,15 +16,15 @@ export async function GET() {
       );
     }
 
-    const user = await db()
-      .select({
-        credits: users.credits,
-        tier: users.tier,
-      })
-      .from(users)
-      .where(eq(users.id, session.user.id))
-      .limit(1)
-      .then(rows => rows[0]);
+    const [user, entitlements] = await Promise.all([
+      db()
+        .select({ credits: users.credits })
+        .from(users)
+        .where(eq(users.id, session.user.id))
+        .limit(1)
+        .then((rows) => rows[0]),
+      getEntitlements(session.user.id),
+    ]);
 
     if (!user) {
       return NextResponse.json(
@@ -32,14 +33,14 @@ export async function GET() {
       );
     }
 
-    const tier = (user.tier ?? 'free') as Tier;
+    const plan = derivePlan(entitlements);
 
     return NextResponse.json({
       success: true,
       data: {
         credits: user.credits,
-        tier,
-        total: TIER_CREDITS[tier],
+        plan,
+        total: PLAN_CREDITS[plan],
       },
     });
   } catch (error) {

@@ -12,6 +12,7 @@ import {
   index,
   uniqueIndex,
 } from 'drizzle-orm/pg-core';
+import type { AnyPgColumn } from 'drizzle-orm/pg-core';
 
 
 const textId = (name: string) =>
@@ -19,13 +20,6 @@ const textId = (name: string) =>
     .notNull()
     .default(sql`gen_random_uuid()`)
     .$defaultFn(() => crypto.randomUUID());
-
-export const userTierEnum = pgEnum('user_tier', [
-  'free',
-  'starter',
-  'pro',
-  'team',
-]);
 
 export const userRoleEnum = pgEnum('user_role', ['user', 'admin']);
 
@@ -58,6 +52,28 @@ export const blogStatusEnum = pgEnum('blog_status', [
 export const contentFormatEnum = pgEnum('content_format', [
   'text',
   'markdown',
+]);
+
+export const assetKindEnum = pgEnum('asset_kind', [
+  'code',
+  'figma',
+  'ai_prompt',
+]);
+
+export const entitlementScopeEnum = pgEnum('entitlement_scope', [
+  'all',
+  'category',
+  'template',
+  'course',
+  'feature',
+]);
+
+export const entitlementSourceEnum = pgEnum('entitlement_source', [
+  'purchase',
+  'subscription',
+  'admin_grant',
+  'promo',
+  'marketplace',
 ]);
 
 export const accounts = pgTable(
@@ -96,6 +112,16 @@ export const accounts = pgTable(
   ]
 );
 
+// better-auth twoFactor() plugin storage (TOTP secret + backup codes)
+export const twoFactors = pgTable('two_factors', {
+  id: textId('id').primaryKey(),
+  userId: text('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  secret: text('secret').notNull(),
+  backupCodes: text('backup_codes').notNull(),
+});
+
 export const verifications = pgTable('verifications', {
   id: textId('id').primaryKey(),
   identifier: varchar('identifier', { length: 255 }).notNull(),
@@ -117,7 +143,6 @@ export const users = pgTable(
     name: varchar('name', { length: 255 }),
     image: text('image'),
     avatarUrl: text('avatar_url'),
-    tier: userTierEnum('tier').default('free').notNull(),
     role: userRoleEnum('role').default('user').notNull(),
     credits: integer('credits').default(0).notNull(),
     defaultFramework: varchar('default_framework', { length: 20 }).default(
@@ -128,6 +153,13 @@ export const users = pgTable(
     ),
     onboardingCompleted: boolean('onboarding_completed').default(false),
     emailVerified: boolean('email_verified').default(false),
+    // Required by the better-auth admin() plugin — user creation fails
+    // without these columns
+    banned: boolean('banned').default(false),
+    banReason: text('ban_reason'),
+    banExpires: timestamp('ban_expires', { withTimezone: true }),
+    // Required by the better-auth twoFactor() plugin
+    twoFactorEnabled: boolean('two_factor_enabled').default(false),
     createdAt: timestamp('created_at', { withTimezone: true })
       .defaultNow()
       .notNull(),
@@ -137,7 +169,6 @@ export const users = pgTable(
   },
   (table) => [
     uniqueIndex('users_email_idx').on(table.email),
-    index('users_tier_idx').on(table.tier),
   ]
 );
 
@@ -152,6 +183,8 @@ export const sessions = pgTable(
     expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
     ipAddress: varchar('ip_address', { length: 45 }),
     userAgent: text('user_agent'),
+    // Required by the better-auth admin() plugin (impersonation support)
+    impersonatedBy: text('impersonated_by'),
     createdAt: timestamp('created_at', { withTimezone: true })
       .defaultNow()
       .notNull(),
@@ -225,12 +258,95 @@ export const payments = pgTable('payments', {
     .notNull(),
 });
 
+// Sellable products (plans, add-ons). Prices + grants are DB-managed from
+// the admin panel; config/products.ts only seeds this table and defines
+// dynamic single-item SKUs. grants shape: [{ scope, scopeRef?, durationDays? }]
+export const productsTable = pgTable('products', {
+  id: text('id').primaryKey(), // stable slug: 'basic' | 'pro' | 'premium' | …
+  name: varchar('name', { length: 255 }).notNull(),
+  description: text('description'),
+  mode: varchar('mode', { length: 20 }).default('payment').notNull(),
+  interval: varchar('interval', { length: 10 }),
+  priceUsdCents: integer('price_usd_cents').notNull(),
+  priceInrPaise: integer('price_inr_paise').notNull(),
+  grants: jsonb('grants')
+    .$type<{ scope: string; scopeRef?: string; durationDays?: number }[]>()
+    .notNull()
+    .default([]),
+  active: boolean('active').default(true).notNull(),
+  displayOrder: integer('display_order').default(0).notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+// One row = one grant of access. All packaging (bundles, passes, single
+// purchases, promos, marketplace sales) reduces to rows here; lib/access is
+// the only reader.
+export const entitlements = pgTable(
+  'entitlements',
+  {
+    id: textId('id').primaryKey(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    scope: entitlementScopeEnum('scope').notNull(),
+    // category_id / prompt_id / module_id / feature key; NULL for scope 'all'
+    scopeId: text('scope_id'),
+    source: entitlementSourceEnum('source').notNull(),
+    paymentId: text('payment_id').references(() => payments.id, {
+      onDelete: 'set null',
+    }),
+    // NULL = lifetime; subscriptions set period end and renewals extend it
+    expiresAt: timestamp('expires_at', { withTimezone: true }),
+    revokedAt: timestamp('revoked_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index('entitlements_user_scope_idx').on(
+      table.userId,
+      table.scope,
+      table.scopeId
+    ),
+  ]
+);
+
+export const templateDownloads = pgTable(
+  'template_downloads',
+  {
+    id: textId('id').primaryKey(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    promptId: text('prompt_id')
+      .notNull()
+      .references(() => prompts.id, { onDelete: 'cascade' }),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index('template_downloads_user_id_idx').on(table.userId),
+    index('template_downloads_prompt_id_idx').on(table.promptId),
+  ]
+);
+
 export const categories = pgTable('categories', {
   id: textId('id').primaryKey(),
   name: varchar('name', { length: 100 }).notNull(),
   slug: varchar('slug', { length: 100 }).notNull().unique(),
   description: text('description'),
   icon: varchar('icon', { length: 50 }),
+  // One-level hierarchy: NULL = top-level, otherwise the parent category.
+  // Filtering by a parent includes all of its children's templates.
+  parentId: text('parent_id').references((): AnyPgColumn => categories.id, {
+    onDelete: 'set null',
+  }),
   displayOrder: integer('display_order').default(0).notNull(),
   createdAt: timestamp('created_at', { withTimezone: true })
     .defaultNow()
@@ -248,8 +364,13 @@ export const prompts = pgTable(
     promptText: text('prompt_text').notNull(),
     
     
-    detailedPrompt: text('detailed_prompt'), 
-    templateType: varchar('template_type', { length: 50 }).default('simple'), 
+    detailedPrompt: text('detailed_prompt'),
+    // Scope of the template: 'full' = complete website/app/page,
+    // 'component' = single section/widget. Applies to every asset_kind.
+    templateType: varchar('template_type', { length: 50 }).default('component'),
+    // Target platform: 'web' | 'mobile' | 'universal'. Applies to every kind
+    // (code, figma kits and prompts all target web or mobile apps).
+    platform: varchar('platform', { length: 20 }).default('web').notNull(),
     previewImageUrl: text('preview_image_url'),
     previewVideoUrl: text('preview_video_url'), 
     thumbnailUrl: text('thumbnail_url'), 
@@ -272,7 +393,12 @@ export const prompts = pgTable(
       darkMode?: boolean;
     }>(),
     
-    tier: userTierEnum('tier').default('free').notNull(),
+    // Catalog fields: access is decided by entitlements (lib/access).
+    assetKind: assetKindEnum('asset_kind').default('ai_prompt').notNull(),
+    isFree: boolean('is_free').default(false).notNull(),
+    // Downloadable asset (zip / .fig / prompt pack) — served only via the
+    // entitlement-gated download endpoint, never from /public
+    assetUrl: text('asset_url'),
     frameworks: varchar('frameworks', { length: 20 })
       .array()
       .default(['react']),
@@ -291,7 +417,6 @@ export const prompts = pgTable(
   },
   (table) => [
     index('prompts_category_id_idx').on(table.categoryId),
-    index('prompts_tier_idx').on(table.tier),
     index('prompts_is_published_idx').on(table.isPublished),
     index('prompts_template_type_idx').on(table.templateType),
     index('prompts_is_premium_idx').on(table.isPremium),
@@ -573,3 +698,28 @@ export const blogPostsRelations = relations(blogPosts, ({ one }) => ({
     references: [users.id],
   }),
 }));
+
+export const entitlementsRelations = relations(entitlements, ({ one }) => ({
+  user: one(users, {
+    fields: [entitlements.userId],
+    references: [users.id],
+  }),
+  payment: one(payments, {
+    fields: [entitlements.paymentId],
+    references: [payments.id],
+  }),
+}));
+
+export const templateDownloadsRelations = relations(
+  templateDownloads,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [templateDownloads.userId],
+      references: [users.id],
+    }),
+    prompt: one(prompts, {
+      fields: [templateDownloads.promptId],
+      references: [prompts.id],
+    }),
+  })
+);

@@ -1,5 +1,6 @@
-const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'localhost:3000';
-const protocol = rootDomain.includes('localhost') ? 'http' : 'https';
+const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'lvh.me:3000';
+// A port in the root domain means local dev over http; real domains are https
+const protocol = rootDomain.includes(':') ? 'http' : 'https';
 
 export const siteConfig = {
   name: 'Promtify',
@@ -13,9 +14,11 @@ export const siteConfig = {
   marketingUrl: `${protocol}://${rootDomain}`,
 
   links: {
-    twitter: 'https://twitter.com/promtify',
+    x: 'https://x.com/promtify',
     github: 'https://github.com/promtify',
     discord: 'https://discord.gg/promtify',
+    bluesky: 'https://bsky.app/profile/promtify.dev',
+    linkedin: 'https://www.linkedin.com/company/promtify',
   },
   creator: 'Mubashir Ahmed',
   keywords: [

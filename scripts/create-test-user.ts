@@ -18,7 +18,6 @@ async function createTestUser() {
       email: testEmail,
       name: testName,
       role: 'user',
-      tier: 'free',
       credits: 50,
       emailVerified: true,
     })
@@ -26,8 +25,7 @@ async function createTestUser() {
       target: users.email,
       set: {
         role: 'user',
-        tier: 'free',
-        emailVerified: true,
+          emailVerified: true,
         updatedAt: new Date(),
       },
     })

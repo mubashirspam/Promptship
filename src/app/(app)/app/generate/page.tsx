@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
-import { GeneratorForm } from '@/components/generator/generator-form';
-import { CodePreview } from '@/components/generator/code-preview';
+import { Sparkles } from 'lucide-react';
+import { ComingSoon } from '@/components/shared/coming-soon';
 
 export const metadata: Metadata = {
   title: 'AI Generator',
@@ -8,21 +8,15 @@ export const metadata: Metadata = {
 
 export default function GeneratePage() {
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">AI Code Generator</h1>
-        <p className="text-muted-foreground">
-          Generate production-ready UI code from prompts.
-        </p>
-      </div>
-      <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-6">
-        <div className="rounded-xl border bg-card p-5">
-          <GeneratorForm />
-        </div>
-        <div className="rounded-xl border bg-card p-5">
-          <CodePreview />
-        </div>
-      </div>
-    </div>
+    <ComingSoon
+      icon={Sparkles}
+      title="AI Code Generator"
+      description="Turn any prompt into production-ready UI code in seconds. We're putting the finishing touches on it."
+      highlights={[
+        'Generate React, Flutter, HTML & Vue components',
+        'Start from any prompt in your library',
+        'Live preview and one-click copy',
+      ]}
+    />
   );
 }

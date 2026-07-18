@@ -86,7 +86,7 @@ async function seedMarkdownPrompts() {
           description,
           promptText: content,
           categoryId: landingPagesCategoryId,
-          tier: 'free',
+          isFree: true,
           frameworks: ['react'],
           isFeatured: false,
           isPublished: true,

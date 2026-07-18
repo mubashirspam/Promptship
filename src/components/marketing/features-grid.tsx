@@ -6,32 +6,32 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { FileText, Sparkles, Code, GraduationCap } from "lucide-react";
+import { Figma, Sparkles, Code, GraduationCap } from "lucide-react";
 
 const features = [
   {
-    icon: FileText,
-    title: "100+ Curated Prompts",
+    icon: Figma,
+    title: "Figma Kits",
     description:
-      "Hand-crafted prompts for every UI pattern, from landing pages and dashboards to complex data tables and authentication flows.",
+      "Full website and mobile-app design kits plus single components — auto-layout, organized, ready to duplicate into your drafts and customize.",
   },
   {
     icon: Sparkles,
-    title: "One-Click Generation",
+    title: "AI Prompts",
     description:
-      "Generate production-ready code instantly with AI. Just pick a prompt, choose your framework, and get clean, usable components.",
+      "Battle-tested markdown prompts for every UI pattern. Paste into Claude, Cursor or v0 and get production-ready screens in one shot.",
   },
   {
     icon: Code,
-    title: "Multi-Framework",
+    title: "Code Starters",
     description:
-      "React, Flutter, HTML, Vue - one prompt, any framework. Write once, generate everywhere with consistent, high-quality output.",
+      "Download complete source — full sites and components for React, Next.js, Flutter, React Native, Kotlin, Swift and more. Unzip and ship.",
   },
   {
     icon: GraduationCap,
-    title: "Learn & Master",
+    title: "Video Courses",
     description:
-      "Comprehensive video courses that teach you to craft better prompts, build faster UIs, and master AI-assisted development.",
+      "A $7 add-on: the full course library on building with AI, design systems and framework deep dives. One payment, lifetime access.",
   },
 ] as const;
 

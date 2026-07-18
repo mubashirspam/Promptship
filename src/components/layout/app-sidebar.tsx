@@ -2,15 +2,9 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ChevronLeft, ChevronRight, Lock } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import {
-  hasTierAccess,
-  TIER_LABELS,
-  TIER_COLORS,
-  TIER_CREDITS,
-  type Tier,
-} from '@/lib/utils/constants';
+import { PLAN_LABELS, PLAN_COLORS } from '@/lib/utils/constants';
 import { Logo } from '@/components/shared/logo';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -24,12 +18,10 @@ export function AppSidebar() {
   const pathname = usePathname();
   const { sidebarOpen, toggleSidebar } = useUIStore();
   const { user } = useAuth();
-  const { credits } = useCredits();
+  const { credits, plan, total: maxCredits } = useCredits();
 
-  const tier = ((user as any)?.tier ?? 'free') as Tier;
   const userName = (user as any)?.name as string | null;
   const userImage = (user as any)?.image as string | null;
-  const maxCredits = TIER_CREDITS[tier];
   const creditPercent = maxCredits > 0 ? Math.min((credits / maxCredits) * 100, 100) : 0;
 
   function isActive(href: string) {
@@ -75,10 +67,10 @@ export function AppSidebar() {
                 <span
                   className={cn(
                     'truncate text-xs font-medium',
-                    TIER_COLORS[tier]
+                    PLAN_COLORS[plan]
                   )}
                 >
-                  {TIER_LABELS[tier]}
+                  {PLAN_LABELS[plan]}
                 </span>
               </div>
             </div>
@@ -102,42 +94,41 @@ export function AppSidebar() {
       <nav className="flex-1 overflow-y-auto px-2 py-3">
         <ul className="flex flex-col gap-1">
           {appNavigation.map((item) => {
-            const accessible = hasTierAccess(tier, item.tier);
             const active = isActive(item.href);
-            const href = accessible ? item.href : '/upgrade';
 
             return (
               <li key={item.href}>
                 <Link
-                  href={href}
+                  href={item.href}
                   className={cn(
                     'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-                    active && accessible
+                    active
                       ? 'bg-primary text-primary-foreground'
                       : 'text-muted-foreground hover:bg-muted hover:text-foreground',
-                    !accessible && 'opacity-50',
                     !sidebarOpen && 'justify-center px-2'
                   )}
                 >
-                  {accessible ? (
-                    <item.icon className="size-4 shrink-0" />
-                  ) : (
-                    <Lock className="size-4 shrink-0" />
-                  )}
+                  <item.icon className="size-4 shrink-0" />
                   {sidebarOpen && (
                     <>
                       <span className="flex-1 truncate">{item.title}</span>
-                      {item.badge && accessible && (
-                        <span
-                          className={cn(
-                            'rounded-md px-1.5 py-0.5 text-[10px] font-semibold leading-none',
-                            item.badge === 'NEW'
-                              ? 'bg-emerald-500/10 text-emerald-500'
-                              : 'bg-muted text-muted-foreground'
-                          )}
-                        >
-                          {item.badge}
+                      {item.comingSoon ? (
+                        <span className="rounded-md bg-muted px-1.5 py-0.5 text-[10px] font-semibold leading-none text-muted-foreground">
+                          Soon
                         </span>
+                      ) : (
+                        item.badge && (
+                          <span
+                            className={cn(
+                              'rounded-md px-1.5 py-0.5 text-[10px] font-semibold leading-none',
+                              item.badge === 'NEW'
+                                ? 'bg-emerald-500/10 text-emerald-500'
+                                : 'bg-muted text-muted-foreground'
+                            )}
+                          >
+                            {item.badge}
+                          </span>
+                        )
                       )}
                     </>
                   )}
@@ -149,7 +140,7 @@ export function AppSidebar() {
       </nav>
 
       <div className="mt-auto px-2 pb-2">
-        {tier === 'free' && (
+        {plan === 'free' && (
           <>
             <Link
               href={upgradeItem.href}

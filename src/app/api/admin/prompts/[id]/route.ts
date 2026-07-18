@@ -46,10 +46,51 @@ export async function PUT(
     const { id } = await params;
     const body = await request.json();
 
+    if (
+      body.assetKind !== undefined &&
+      !['ai_prompt', 'figma', 'code'].includes(body.assetKind)
+    ) {
+      return NextResponse.json(
+        { success: false, error: { code: 'VALIDATION', message: 'Invalid assetKind' } },
+        { status: 400 }
+      );
+    }
+    if (
+      body.templateType !== undefined &&
+      !['full', 'component'].includes(body.templateType)
+    ) {
+      return NextResponse.json(
+        { success: false, error: { code: 'VALIDATION', message: 'templateType must be "full" or "component"' } },
+        { status: 400 }
+      );
+    }
+    if (
+      body.platform !== undefined &&
+      !['web', 'mobile', 'universal'].includes(body.platform)
+    ) {
+      return NextResponse.json(
+        { success: false, error: { code: 'VALIDATION', message: 'platform must be web, mobile or universal' } },
+        { status: 400 }
+      );
+    }
+
+    // Whitelist editable fields — never spread the raw body (counters,
+    // timestamps and ids must not be client-writable)
+    const editable = [
+      'title', 'slug', 'description', 'promptText', 'detailedPrompt',
+      'categoryId', 'frameworks', 'previewImageUrl',
+      'previewVideoUrl', 'thumbnailUrl', 'assetKind', 'templateType',
+      'platform', 'isFree', 'assetUrl', 'isFeatured', 'isPublished',
+    ] as const;
+    const updates: Record<string, unknown> = {};
+    for (const key of editable) {
+      if (body[key] !== undefined) updates[key] = body[key];
+    }
+
     const result = await db()
       .update(prompts)
       .set({
-        ...body,
+        ...updates,
         updatedAt: new Date(),
       })
       .where(eq(prompts.id, id))

@@ -12,7 +12,7 @@ export const dynamic = 'force-dynamic';
 
 export default async function NewPromptPage() {
   const allCategories = await db()
-    .select({ id: categories.id, name: categories.name, slug: categories.slug })
+    .select({ id: categories.id, name: categories.name, slug: categories.slug, parentId: categories.parentId })
     .from(categories)
     .orderBy(asc(categories.displayOrder));
 

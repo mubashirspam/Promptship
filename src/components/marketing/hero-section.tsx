@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { motion } from "motion/react";
+import { siteConfig } from "@/config/site";
 import Hls from "hls.js";
 
 const VIDEO_SRC =
@@ -58,7 +59,7 @@ export function HeroSection() {
           className="mb-10 inline-flex items-center gap-2.5 rounded-full border border-white/20 bg-white/10 px-5 py-2 text-[11px] font-medium uppercase tracking-widest text-white/70 backdrop-blur-sm"
         >
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-          Now in Beta
+          400+ Templates · Figma Kits · AI Prompts · Code Starters
         </motion.div>
 
         {/* Headline */}
@@ -68,9 +69,9 @@ export function HeroSection() {
           transition={{ delay: 0.2, duration: 0.6 }}
           className="max-w-4xl bg-gradient-to-b from-[#f97316] via-white to-[#a855f7] bg-clip-text text-6xl font-semibold leading-[0.9] tracking-tighter text-transparent sm:text-8xl lg:text-[136px]"
         >
-          Describe it.
+          Pick it.
           <br />
-          We build it.
+          Ship it.
         </motion.h1>
 
         {/* Subheadline */}
@@ -80,8 +81,9 @@ export function HeroSection() {
           transition={{ delay: 0.4, duration: 0.6 }}
           className="mx-auto mt-8 max-w-xl text-lg leading-[1.65] text-white sm:text-[20px]"
         >
-          The AI prompt library that turns a single sentence into
-          production&#8209;ready Flutter & React UI — in seconds.
+          Premium Figma Kits, AI Prompts and Code Starters for web
+          and mobile. Pay once, own it forever — download, copy and
+          ship in minutes.
         </motion.p>
 
         {/* CTAs */}
@@ -91,12 +93,18 @@ export function HeroSection() {
           transition={{ delay: 0.6, duration: 0.5 }}
           className="mt-12 flex flex-wrap items-center justify-center gap-3"
         >
-          <button className="cursor-pointer rounded-full bg-white px-9 py-3.5 text-[13px] font-semibold text-[#0a0400] transition-all duration-200 hover:scale-[1.03] hover:shadow-[0_0_40px_rgba(255,255,255,0.2)]">
-            Generate for Free
-          </button>
-          <button className="cursor-pointer rounded-full border border-white/25 bg-white/10 px-9 py-3.5 text-[13px] font-medium text-white/80 backdrop-blur-sm transition-all duration-200 hover:border-white/40 hover:bg-white/15 hover:text-white">
-            Explore Prompts →
-          </button>
+          <a
+            href={`${siteConfig.appUrl}/signup`}
+            className="cursor-pointer rounded-full bg-white px-9 py-3.5 text-[13px] font-semibold text-[#0a0400] transition-all duration-200 hover:scale-[1.03] hover:shadow-[0_0_40px_rgba(255,255,255,0.2)]"
+          >
+            Browse templates free
+          </a>
+          <a
+            href="/pricing"
+            className="cursor-pointer rounded-full border border-white/25 bg-white/10 px-9 py-3.5 text-[13px] font-medium text-white/80 backdrop-blur-sm transition-all duration-200 hover:border-white/40 hover:bg-white/15 hover:text-white"
+          >
+            See lifetime pricing →
+          </a>
         </motion.div>
 
         {/* Trust strip */}

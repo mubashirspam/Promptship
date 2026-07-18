@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Promtify — Complete Project Reference (Code-Level Audit)</title>
+<style>
+  :root {
+    --bg: #0d1117; --panel: #161b22; --panel2: #1c2129; --border: #2d333b;
+    --text: #e6edf3; --muted: #8b949e; --accent: #a78bfa; --accent2: #22d3ee;
+    --green: #4ade80; --red: #f87171; --amber: #fbbf24; --code-bg: #21262d;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); line-height: 1.65; }
+  .layout { display: flex; min-height: 100vh; }
+  nav.sidebar { width: 250px; background: var(--panel); border-right: 1px solid var(--border); padding: 24px 0; position: fixed; top: 0; bottom: 0; overflow-y: auto; }
+  nav.sidebar h1 { font-size: 17px; padding: 0 20px 14px; color: var(--accent); border-bottom: 1px solid var(--border); margin-bottom: 12px; }
+  nav.sidebar a { display: block; padding: 7px 20px; color: var(--muted); text-decoration: none; font-size: 13.5px; border-left: 3px solid transparent; }
+  nav.sidebar a:hover { color: var(--text); background: var(--panel2); border-left-color: var(--accent); }
+  main { margin-left: 250px; padding: 40px 48px 100px; max-width: 1100px; flex: 1; }
+  h2 { font-size: 26px; margin: 56px 0 8px; padding-top: 24px; border-top: 2px solid var(--border); color: var(--accent); }
+  h2:first-of-type { margin-top: 0; border-top: none; padding-top: 0; }
+  h3 { font-size: 19px; margin: 30px 0 10px; color: var(--accent2); }
+  h4 { font-size: 15.5px; margin: 20px 0 6px; color: var(--text); }
+  p { margin: 8px 0; color: var(--text); }
+  .lead { color: var(--muted); font-size: 15px; margin-bottom: 20px; }
+  table { width: 100%; border-collapse: collapse; margin: 14px 0 22px; font-size: 13.5px; }
+  th { background: var(--panel2); text-align: left; padding: 9px 12px; border: 1px solid var(--border); color: var(--accent2); font-weight: 600; white-space: nowrap; }
+  td { padding: 8px 12px; border: 1px solid var(--border); vertical-align: top; }
+  tr:nth-child(even) td { background: rgba(255,255,255,0.015); }
+  code { background: var(--code-bg); padding: 2px 7px; border-radius: 5px; font-family: 'SF Mono', Consolas, monospace; font-size: 12.5px; color: #79c0ff; }
+  pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; padding: 16px; overflow-x: auto; margin: 12px 0 20px; font-size: 12.5px; line-height: 1.6; }
+  pre code { background: none; padding: 0; color: #e6edf3; }
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 18px 22px; margin: 14px 0; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  @media (max-width: 900px) { .grid2, .grid3 { grid-template-columns: 1fr; } main { margin-left: 0; padding: 20px; } nav.sidebar { display: none; } }
+  .tag { display: inline-block; padding: 2px 9px; border-radius: 20px; font-size: 11px; font-weight: 600; margin-right: 5px; }
+  .tag-get { background: rgba(74,222,128,.15); color: var(--green); }
+  .tag-post { background: rgba(167,139,250,.15); color: var(--accent); }
+  .tag-put, .tag-patch { background: rgba(251,191,36,.15); color: var(--amber); }
+  .tag-del { background: rgba(248,113,113,.15); color: var(--red); }
+  .ok { color: var(--green); } .warn { color: var(--amber); } .bad { color: var(--red); } .dim { color: var(--muted); }
+  .callout { border-left: 4px solid var(--amber); background: rgba(251,191,36,.07); padding: 12px 18px; border-radius: 0 8px 8px 0; margin: 14px 0; }
+  .callout.red { border-left-color: var(--red); background: rgba(248,113,113,.07); }
+  .callout.green { border-left-color: var(--green); background: rgba(74,222,128,.07); }
+  ul, ol { margin: 8px 0 8px 24px; }
+  li { margin: 4px 0; }
+  .small { font-size: 12.5px; color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar">
+  <h1>🚀 Promtify Reference</h1>
+  <a href="#overview">1. Overview & Tech Stack</a>
+  <a href="#architecture">2. Architecture & Portals</a>
+  <a href="#routing">3. Subdomain Routing (proxy.ts)</a>
+  <a href="#auth">4. Authentication</a>
+  <a href="#database">5. Database (Neon + Drizzle)</a>
+  <a href="#portal-marketing">6. Marketing Portal</a>
+  <a href="#portal-app">7. App Portal</a>
+  <a href="#portal-admin">8. Admin Portal</a>
+  <a href="#api">9. API Endpoints (22)</a>
+  <a href="#ai">10. AI Generation Module</a>
+  <a href="#payments">11. Payments Module</a>
+  <a href="#email-storage">12. Email & Storage</a>
+  <a href="#state">13. State Management</a>
+  <a href="#tiers">14. Tiers, Credits & Pricing</a>
+  <a href="#env">15. Environment Variables</a>
+  <a href="#scripts">16. Scripts & Tooling</a>
+  <a href="#deploy">17. Deployment & CI/CD</a>
+  <a href="#issues">18. ⚠️ Issues & Incomplete Work</a>
+  <a href="#unused">19. 🗑️ Unused Files (Phase 2)</a>
+  <a href="#target">20. 🎯 Target Architecture Plan</a>
+</nav>
+<main>
+
+<h2 id="overview">1. Overview & Tech Stack</h2>
+<p class="lead">Audited 2026-07-16 directly from source code (not from README/ARCHITECTURE docs). Package name: <code>promtify</code> v0.1.0 — an AI UI-prompt library SaaS: curated prompts + one-click AI code generation + video courses, sold via tiered plans.</p>
+
+<div class="grid2">
+<div class="card">
+  <h4>Core Framework</h4>
+  <ul>
+    <li><b>Next.js 16.2.1</b> (App Router, <code>reactCompiler: true</code>)</li>
+    <li><b>React 19.2.4</b> + React DOM</li>
+    <li><b>TypeScript 5</b>, strict via tsconfig</li>
+    <li><b>Tailwind CSS v4</b> (via <code>@tailwindcss/postcss</code>)</li>
+    <li><b>shadcn/ui</b> + Radix primitives (21 ui components)</li>
+  </ul>
+</div>
+<div class="card">
+  <h4>Backend / Data</h4>
+  <ul>
+    <li><b>Neon</b> serverless Postgres (<code>@neondatabase/serverless</code>, HTTP driver)</li>
+    <li><b>Drizzle ORM 0.45</b> + drizzle-kit migrations</li>
+    <li><b>better-auth 1.5</b> (email/password + Google + GitHub)</li>
+    <li><b>Anthropic SDK</b> (Claude, primary) + <b>OpenAI SDK</b> (fallback)</li>
+    <li><b>Stripe 20</b> + <b>Razorpay 2.9</b> (dual payment providers)</li>
+    <li><b>Resend</b> (email) · <b>Vercel Blob</b> (storage)</li>
+  </ul>
+</div>
+<div class="card">
+  <h4>Frontend Libraries</h4>
+  <ul>
+    <li><b>Zustand 5</b> — 3 stores (auth-modal, generator, ui)</li>
+    <li><b>TanStack React Query 5</b> — provider wired</li>
+    <li><b>react-hook-form + zod 4</b> — auth forms</li>
+    <li><b>framer-motion 12</b> AND <b>motion 12</b> (both installed — duplicate)</li>
+    <li><b>hls.js</b> — Mux HLS video in hero</li>
+    <li><b>sonner</b> toasts · <b>next-themes</b> dark mode · <b>lucide-react</b> icons</li>
+    <li><b>react-markdown + remark-gfm</b> — blog/markdown rendering</li>
+  </ul>
+</div>
+<div class="card">
+  <h4>Infra</h4>
+  <ul>
+    <li><b>Vercel</b> hosting (vercel.json, subdomain wildcard)</li>
+    <li><b>GitHub Actions</b> — deploy-staging.yml / deploy-production.yml</li>
+    <li>3 DB environments: dev / staging / production (3 drizzle configs)</li>
+    <li>pnpm 11 package manager</li>
+    <li><span class="warn">@upstash/ratelimit + redis installed but never used in code</span></li>
+  </ul>
+</div>
+</div>
+
+<h2 id="architecture">2. Architecture & Portals</h2>
+<p>Single Next.js app serving <b>4 portals</b> via subdomain routing + App Router route groups:</p>
+<table>
+<tr><th>Portal</th><th>Domain</th><th>Route Group</th><th>Auth</th><th>Purpose</th></tr>
+<tr><td>Marketing</td><td><code>promtify.dev</code></td><td><code>(marketing)</code></td><td>Public</td><td>Landing, pricing, blog</td></tr>
+<tr><td>App</td><td><code>app.promtify.dev</code></td><td><code>(app)</code></td><td>Session required</td><td>Dashboard, prompts, generator, courses</td></tr>
+<tr><td>Admin</td><td><code>admin.promtify.dev</code></td><td><code>(admin)</code></td><td>Session + <code>role=admin</code></td><td>CMS: prompts, blog, users, orders, analytics</td></tr>
+<tr><td>Auth</td><td><code>app.promtify.dev/login</code> etc.</td><td><code>(auth)</code></td><td>Public (redirects if logged in)</td><td>Login, signup, verify</td></tr>
+<tr><td>Docs</td><td><code>promtify.dev/docs</code></td><td><code>(docs)</code></td><td>Public</td><td>Architecture docs pages</td></tr>
+</table>
+<p class="small">Local dev equivalents: <code>localhost:3000</code>, <code>app.localhost:3000</code>, <code>admin.localhost:3000</code>.</p>
+
+<h3>Source Layout</h3>
+<pre><code>src/
+├── proxy.ts                  ← Next 16 middleware (subdomain router + auth gate)
+├── app/
+│   ├── (marketing)/          ← /, /pricing, /blog, /blog/[slug]
+│   ├── (app)/                ← /dashboard /prompts /generate /learn /history /settings /templates /upgrade
+│   ├── (admin)/admin/        ← /admin/{prompts,blog,users,orders,courses,analytics,settings}
+│   ├── (auth)/               ← /login /signup /verify
+│   ├── (docs)/docs/          ← /docs, /docs/architecture
+│   └── api/                  ← 22 route handlers
+├── components/               ← admin/ auth/ dashboard/ generator/ layout/ marketing/ prompts/ providers/ shared/ ui/
+├── config/                   ← site.ts, pricing.ts, navigation.ts
+├── hooks/                    ← use-auth, use-credits (+4 unused)
+├── lib/
+│   ├── ai/                   ← providers (claude/openai), system-prompts, templates (unused)
+│   ├── auth/                 ← index (server), client, session, require-admin, redirect
+│   ├── db/                   ← index (lazy Neon+Drizzle), schema.ts, migrations/
+│   ├── email/                ← Resend (magic link + welcome — never called)
+│   ├── payments/             ← stripe.ts, razorpay.ts
+│   ├── storage.ts            ← Vercel Blob (never called)
+│   ├── utils/                ← constants.ts (tiers/limits), format.ts
+│   └── validations/          ← auth.ts, generator.ts, prompts.ts (unused)
+├── stores/                   ← auth-store, generator-store, ui-store (zustand)
+└── types/                    ← api, database, generator, index</code></pre>
+
+<h2 id="routing">3. Subdomain Routing — <code>src/proxy.ts</code></h2>
+<p>Next.js 16 middleware (new <code>proxy.ts</code> convention). Runs on every request except <code>_next/static</code>, <code>_next/image</code>, <code>favicon.ico</code>, <code>public</code>, <code>docs/promptship</code>.</p>
+<div class="card">
+<h4>Flow per subdomain</h4>
+<ul>
+<li><b>admin.*</b> — API paths pass through → no session cookie? redirect to <code>app.*/login?callbackUrl=…</code> → otherwise <b>rewrite</b> <code>/x</code> → <code>/admin/x</code> (maps into <code>(admin)/admin/</code> route group). <span class="warn">Role check happens later in layout/API, not in proxy.</span></li>
+<li><b>app.*</b> — <code>/login /signup /verify</code> and <code>/api/*</code> always pass through; everything else requires the <code>ps.session_token</code> (or <code>__Secure-ps.session_token</code>) cookie else redirect to /login.</li>
+<li><b>root domain</b> — logged-in user hitting <code>/</code> → redirect to <code>app.*/dashboard</code>; <code>/admin*</code> → redirect to admin subdomain; app-only routes (<code>/dashboard /prompts /generate /learn /history /settings</code>) → redirect to app subdomain; all else (marketing) passes.</li>
+</ul>
+</div>
+<p class="small">Note: proxy only checks cookie <i>presence</i>, not validity — real validation happens server-side via better-auth in layouts/APIs.</p>
+
+<h2 id="auth">4. Authentication — better-auth</h2>
+<h3>Server config (<code>src/lib/auth/index.ts</code>)</h3>
+<table>
+<tr><th>Setting</th><th>Value</th></tr>
+<tr><td>baseURL</td><td><code>BETTER_AUTH_URL</code> or <code>https://app.{ROOT_DOMAIN}</code></td></tr>
+<tr><td>Trusted origins</td><td>root, app.*, admin.* (all 3 subdomains)</td></tr>
+<tr><td>DB adapter</td><td>drizzleAdapter → own Neon connection (separate from lib/db) mapping user/session/account/verification → <code>users/sessions/accounts/verifications</code> tables</td></tr>
+<tr><td>Methods</td><td>① Email + password ② Google OAuth ③ GitHub OAuth</td></tr>
+<tr><td>Session</td><td>expires 7 days, refreshed every 24h, cookie cache 5 min</td></tr>
+<tr><td>Cookies</td><td>prefix <code>ps</code>, <code>sameSite=lax</code>, secure in prod, domain <code>.{ROOT_DOMAIN}</code> so all subdomains share the session (undefined on localhost)</td></tr>
+<tr><td>Extra user fields</td><td><code>tier</code> (default free), <code>role</code> (default user), <code>credits</code> (default 0)</td></tr>
+<tr><td>Plugins</td><td><code>admin()</code> plugin from better-auth</td></tr>
+</table>
+
+<h3>Auth helper files</h3>
+<table>
+<tr><th>File</th><th>Exports</th><th>Used for</th></tr>
+<tr><td><code>lib/auth/client.ts</code></td><td><code>authClient, signIn, signOut, useSession</code></td><td>Client components (baseURL = window.origin)</td></tr>
+<tr><td><code>lib/auth/session.ts</code></td><td><code>getSession(), requireSession()</code></td><td>Server components / API routes</td></tr>
+<tr><td><code>lib/auth/require-admin.ts</code></td><td><code>requireAdmin()</code> → {error|session}</td><td>Admin API routes (401/403 JSON)</td></tr>
+<tr><td><code>lib/auth/redirect.ts</code></td><td><code>getRedirectUrl(), getLoginUrl(), isCorrectSubdomain()</code></td><td>Role-based post-login routing (admin → admin.*, user → app.*/dashboard)</td></tr>
+<tr><td><code>api/auth/[...all]/route.ts</code></td><td><code>GET, POST</code> via <code>toNextJsHandler(auth)</code></td><td>All better-auth endpoints (/api/auth/*)</td></tr>
+</table>
+
+<h3>Auth UI components (<code>components/auth/</code>)</h3>
+<ul>
+<li><code>auth-form.tsx</code> — the active combined login/signup form (react-hook-form + zod, <code>validations/auth.ts</code>)</li>
+<li><code>auth-card.tsx</code>, <code>magic-link-form.tsx</code>, <code>social-buttons.tsx</code>, <code>google-sign-in-button.tsx</code> — supporting pieces</li>
+<li><span class="warn"><code>login-form.tsx</code>, <code>signup-form.tsx</code> — superseded by auth-form, no longer imported anywhere</span></li>
+</ul>
+
+<h2 id="database">5. Database — Neon Postgres + Drizzle</h2>
+<p><code>lib/db/index.ts</code> exports lazy singleton <code>db()</code> (neon-http driver — HTTP, no websockets, per-request). Schema: <code>lib/db/schema.ts</code>, 15 tables, 7 enums. One migration: <code>0000_cuddly_karen_page.sql</code>.</p>
+
+<h3>Enums</h3>
+<table>
+<tr><th>Enum</th><th>Values</th></tr>
+<tr><td><code>user_tier</code></td><td>free · starter · pro · team</td></tr>
+<tr><td><code>user_role</code></td><td>user · admin</td></tr>
+<tr><td><code>subscription_status</code></td><td>active · canceled · past_due · paused · trialing</td></tr>
+<tr><td><code>payment_provider</code></td><td>stripe · razorpay</td></tr>
+<tr><td><code>framework</code></td><td>react · flutter · html · vue</td></tr>
+<tr><td><code>blog_status</code></td><td>draft · published · archived</td></tr>
+<tr><td><code>content_format</code></td><td>text · markdown <span class="warn">(declared, not used on any column)</span></td></tr>
+</table>
+
+<h3>Tables</h3>
+<table>
+<tr><th>Table</th><th>Key Columns</th><th>Purpose / Relations</th></tr>
+<tr><td><code>users</code></td><td>id, email (unique), name, image, avatar_url, <b>tier</b>, <b>role</b>, <b>credits</b>, default_framework, preferred_currency, onboarding_completed, email_verified</td><td>Central user record (shared with better-auth). → many: sessions, accounts, subscriptions, copies, favorites, generations, lessonProgress</td></tr>
+<tr><td><code>sessions</code></td><td>user_id FK, token (unique), expires_at, ip_address, user_agent</td><td>better-auth sessions</td></tr>
+<tr><td><code>accounts</code></td><td>user_id FK, provider_id + account_id (unique pair), access/refresh tokens, <b>password</b> (for credential provider)</td><td>better-auth OAuth + password storage</td></tr>
+<tr><td><code>verifications</code></td><td>identifier, value, expires_at</td><td>better-auth email verification tokens</td></tr>
+<tr><td><code>magic_links</code></td><td>email, token (unique), expires_at, used_at</td><td><span class="warn">Custom table — no code reads/writes it (dead)</span></td></tr>
+<tr><td><code>subscriptions</code></td><td>user_id FK, plan, status (enum), provider (enum), provider_subscription_id, provider_customer_id, period start/end, cancel_at_period_end</td><td>Stripe/Razorpay subscriptions</td></tr>
+<tr><td><code>payments</code></td><td>user_id FK (set null), subscription_id FK, provider, provider_payment_id, amount, currency, status</td><td>Payment ledger</td></tr>
+<tr><td><code>categories</code></td><td>name, slug (unique), icon, display_order</td><td>Prompt categories</td></tr>
+<tr><td><code>prompts</code></td><td>category_id FK, title, slug (unique), prompt_text, <b>detailed_prompt</b>, template_type, preview_image/video_url, thumbnail_url, <b>technical_specs jsonb</b> (fonts/colors/animations/deps/assets), <b>layout_metadata jsonb</b> (sections/components/complexity/responsive/darkMode), tier, frameworks[], usage/copy/favorite counts, is_featured/premium/published</td><td>Core content. 5 indexes (category, tier, published, template_type, premium)</td></tr>
+<tr><td><code>prompt_copies</code></td><td>user_id FK, prompt_id FK, created_at</td><td>Copy tracking (tier limits)</td></tr>
+<tr><td><code>favorites</code></td><td>user_id + prompt_id (unique pair)</td><td>User favorites</td></tr>
+<tr><td><code>generations</code></td><td>user_id FK, prompt_id FK (set null), framework, template_type, options jsonb, input_prompt, output_code, ai_provider, ai_model, tokens in/out, latency_ms, cost_usd decimal</td><td>AI generation history + telemetry</td></tr>
+<tr><td><code>blog_posts</code></td><td>title, slug (unique), excerpt, content, cover_image_url, author_id FK, status (enum), category, tags[], published_at</td><td>Blog CMS</td></tr>
+<tr><td><code>course_modules</code></td><td>title, slug (unique), display_order, is_published</td><td>Course structure → many lessons</td></tr>
+<tr><td><code>lessons</code></td><td>module_id FK, title, slug, video_url, video_duration_sec, display_order, is_free_preview, is_published</td><td>Video lessons (Mux URLs)</td></tr>
+<tr><td><code>lesson_progress</code></td><td>user_id + lesson_id (unique pair), watch_time_sec, is_completed, completed_at, last_position_sec</td><td>Per-user course progress</td></tr>
+</table>
+<p class="small">IDs: all tables use text UUID (<code>gen_random_uuid()</code> DB-side + <code>crypto.randomUUID()</code> app-side). Timestamps are timezone-aware. Deletes cascade from users to owned rows.</p>
+
+<h2 id="portal-marketing">6. Marketing Portal <span class="dim">(marketing) — promtify.dev</span></h2>
+<table>
+<tr><th>Page</th><th>File</th><th>Sections / Components</th></tr>
+<tr><td><code>/</code></td><td><code>(marketing)/page.tsx</code></td><td>ParallaxHero (wraps HeroSection: Mux HLS video via hls.js, motion animations, gradient headline) → TemplateShowcase (masonry, category filter, scroll dotted paths — pulls <code>/api/marketing/templates</code>) → StatsSection → FeaturesGrid → HowItWorks → PricingCards → Testimonials → FAQAccordion → CTASection</td></tr>
+<tr><td><code>/pricing</code></td><td><code>(marketing)/pricing/page.tsx</code></td><td>PricingCards (USD/INR toggle via ui-store, plans from <code>config/pricing.ts</code>, anchor prices + savings badges)</td></tr>
+<tr><td><code>/blog</code>, <code>/blog/[slug]</code></td><td><code>(marketing)/blog/</code></td><td>Published blog_posts, date-fns formatting, markdown rendering</td></tr>
+</table>
+<p>Layout: <code>marketing-header.tsx</code> (scroll-blur navbar) + <code>marketing-footer.tsx</code>. Docs pages <code>(docs)/docs</code> + <code>/docs/architecture</code> are also public.</p>
+
+<h2 id="portal-app">7. App Portal <span class="dim">(app) — app.promtify.dev</span></h2>
+<p>Layout: <code>app-shell.tsx</code> + <code>app-sidebar.tsx</code> (nav from <code>config/navigation.ts</code> with per-item tier gating) + <code>app-header.tsx</code> (credit-badge, theme-toggle) + <code>mobile-nav.tsx</code>.</p>
+<table>
+<tr><th>Page</th><th>Min Tier</th><th>What it does</th></tr>
+<tr><td><code>/dashboard</code></td><td>all</td><td>welcome-banner, welcome-video, stats-cards, quick-actions, recent-generations, new-prompts-widget, course-progress-card</td></tr>
+<tr><td><code>/prompts</code>, <code>/prompts/[category]</code></td><td>all</td><td>Browse library: category-tabs, framework-filter, prompt-search, prompt-grid → prompt-card → prompt-modal (copy flow → POST /api/prompts/[id]/copy, tier-limited)</td></tr>
+<tr><td><code>/generate</code></td><td>pro</td><td>generator-form (framework/style/color/dark/animation options) → generator-store.generate() → POST /api/generate → code-preview. Costs 1 credit</td></tr>
+<tr><td><code>/learn</code>, <code>/learn/[moduleId]/[lessonId]</code></td><td>pro</td><td>Course modules → lessons (video player, lesson-content) + progress tracking via /api/progress</td></tr>
+<tr><td><code>/templates</code></td><td>starter</td><td>Template gallery</td></tr>
+<tr><td><code>/history</code></td><td>all</td><td>Past generations (GET /api/generations, delete supported)</td></tr>
+<tr><td><code>/settings</code></td><td>all</td><td>Profile/preferences → /api/user/settings</td></tr>
+<tr><td><code>/upgrade</code></td><td>all</td><td>Plan upgrade page (payments not fully wired — see Issues)</td></tr>
+</table>
+
+<h2 id="portal-admin">8. Admin Portal <span class="dim">(admin) — admin.promtify.dev</span></h2>
+<p>Layout: <code>admin-sidebar.tsx</code> (with logout). URL rewrite: <code>admin.domain/x</code> → route group <code>(admin)/admin/x</code>. API protection via <code>requireAdmin()</code>.</p>
+<table>
+<tr><th>Page</th><th>Function</th></tr>
+<tr><td><code>/admin</code></td><td>Overview dashboard (GET /api/admin/stats)</td></tr>
+<tr><td><code>/admin/prompts</code> (+ /new, /[id]/edit)</td><td>Prompt CRUD — prompt-form.tsx with technical specs & metadata (POST/PUT/DELETE /api/admin/prompts)</td></tr>
+<tr><td><code>/admin/blog</code> (+ /new, /[id]/edit)</td><td>Blog CRUD — blog-form.tsx + markdown-editor.tsx (live preview)</td></tr>
+<tr><td><code>/admin/users</code></td><td>User list (tier/role/credits)</td></tr>
+<tr><td><code>/admin/orders</code></td><td>Payments/subscriptions view</td></tr>
+<tr><td><code>/admin/courses</code></td><td>Course/lesson management</td></tr>
+<tr><td><code>/admin/analytics</code></td><td>Usage analytics</td></tr>
+<tr><td><code>/admin/settings</code></td><td>Admin settings</td></tr>
+</table>
+
+<h2 id="api">9. API Endpoints — 22 routes</h2>
+<h3>Public / User APIs</h3>
+<table>
+<tr><th>Route</th><th>Methods</th><th>Auth</th><th>Behavior</th></tr>
+<tr><td><code>/api/auth/[...all]</code></td><td><span class="tag tag-get">GET</span><span class="tag tag-post">POST</span></td><td>—</td><td>All better-auth flows (sign-in/up/out, OAuth callbacks, session)</td></tr>
+<tr><td><code>/api/prompts</code></td><td><span class="tag tag-get">GET</span></td><td>Public</td><td>List published prompts (filter: category, framework, search, tier)</td></tr>
+<tr><td><code>/api/prompts/[id]</code></td><td><span class="tag tag-get">GET</span></td><td>Public</td><td>Single prompt detail</td></tr>
+<tr><td><code>/api/prompts/[id]/copy</code></td><td><span class="tag tag-post">POST</span></td><td>Session</td><td>Record copy + enforce tier copy limits + increment copy_count</td></tr>
+<tr><td><code>/api/categories</code></td><td><span class="tag tag-get">GET</span></td><td>Public</td><td>Category list ordered by display_order</td></tr>
+<tr><td><code>/api/marketing/templates</code></td><td><span class="tag tag-get">GET</span></td><td>Public</td><td>Featured templates for landing showcase</td></tr>
+<tr><td><code>/api/favorites</code></td><td><span class="tag tag-get">GET</span><span class="tag tag-post">POST</span></td><td>Session</td><td>List / toggle favorites</td></tr>
+<tr><td><code>/api/generate</code></td><td><span class="tag tag-post">POST</span></td><td>Session + <b>pro tier</b> + <b>credits ≥ 1</b></td><td>Zod-validate → <code>generateCode()</code> (Claude→OpenAI fallback) → insert generation + decrement credit (<code>GREATEST(credits-1,0)</code>) → return code + tokens + latency</td></tr>
+<tr><td><code>/api/generations</code></td><td><span class="tag tag-get">GET</span></td><td>Session</td><td>User's generation history</td></tr>
+<tr><td><code>/api/generations/[id]</code></td><td><span class="tag tag-get">GET</span><span class="tag tag-del">DELETE</span></td><td>Session (owner)</td><td>View / delete one generation</td></tr>
+<tr><td><code>/api/courses</code></td><td><span class="tag tag-get">GET</span></td><td>Session</td><td>Published modules + lessons</td></tr>
+<tr><td><code>/api/progress</code></td><td><span class="tag tag-get">GET</span><span class="tag tag-post">POST</span></td><td>Session</td><td>Read / upsert lesson progress (watch time, completion)</td></tr>
+<tr><td><code>/api/user/credits</code></td><td><span class="tag tag-get">GET</span></td><td>Session</td><td>Current credit balance (polled by use-credits hook)</td></tr>
+<tr><td><code>/api/user/settings</code></td><td><span class="tag tag-get">GET</span><span class="tag tag-patch">PATCH</span></td><td>Session</td><td>Profile & preferences (framework, currency)</td></tr>
+</table>
+
+<h3>Admin APIs <span class="dim">(all behind requireAdmin — 401/403 JSON envelope)</span></h3>
+<table>
+<tr><th>Route</th><th>Methods</th><th>Behavior</th></tr>
+<tr><td><code>/api/admin/prompts</code></td><td><span class="tag tag-get">GET</span><span class="tag tag-post">POST</span></td><td>List all (incl. unpublished) / create prompt</td></tr>
+<tr><td><code>/api/admin/prompts/[id]</code></td><td><span class="tag tag-get">GET</span><span class="tag tag-put">PUT</span><span class="tag tag-del">DELETE</span></td><td>Read / update / delete prompt</td></tr>
+<tr><td><code>/api/admin/blog</code></td><td><span class="tag tag-get">GET</span><span class="tag tag-post">POST</span></td><td>List / create blog posts</td></tr>
+<tr><td><code>/api/admin/blog/[id]</code></td><td><span class="tag tag-get">GET</span><span class="tag tag-put">PUT</span><span class="tag tag-del">DELETE</span></td><td>Read / update / delete post</td></tr>
+<tr><td><code>/api/admin/stats</code></td><td><span class="tag tag-get">GET</span></td><td>Dashboard aggregate counts</td></tr>
+<tr><td><code>/api/admin/setup</code></td><td><span class="tag tag-post">POST</span></td><td>One-time admin bootstrap. Guarded by <code>x-setup-key</code> header == <code>ADMIN_SETUP_KEY</code>. bcrypt-hashes password, upserts admin user + credential account. <span class="warn">Should be removed/disabled after setup</span></td></tr>
+</table>
+
+<h3>Webhooks</h3>
+<table>
+<tr><th>Route</th><th>Verification</th><th>Status</th></tr>
+<tr><td><code>/api/webhooks/stripe</code></td><td><code>stripe-signature</code> → constructWebhookEvent</td><td><span class="bad">All 5 event handlers are empty TODO stubs</span> (checkout.session.completed, subscription updated/deleted, invoice succeeded/failed)</td></tr>
+<tr><td><code>/api/webhooks/razorpay</code></td><td>HMAC-SHA256 timing-safe compare</td><td><span class="bad">All 4 event handlers are empty TODO stubs</span> (subscription activated/charged/cancelled, payment.failed)</td></tr>
+</table>
+
+<h2 id="ai">10. AI Generation Module — <code>src/lib/ai/</code></h2>
+<div class="card">
+<h4>Active pipeline</h4>
+<ol>
+<li><code>index.ts → generateCode(options)</code> — options: promptText, framework, style, animationLevel, darkMode, borderRadius, primaryColor, customInstructions</li>
+<li><code>prompts/system-prompts.ts → buildPrompt()</code> — assembles the full prompt</li>
+<li><b>Primary:</b> <code>providers/claude.ts</code> — <code>claude-sonnet-4-20250514</code>, max_tokens 4096 <span class="warn">(older model — Claude 5 family is current)</span></li>
+<li><b>Fallback on error:</b> <code>providers/openai.ts</code> — <code>gpt-4-turbo</code> <span class="warn">(legacy model)</span></li>
+<li>Returns: code, tokensInput/Output, latencyMs, provider, model → persisted to <code>generations</code></li>
+</ol>
+</div>
+<div class="callout">
+<b>Dead code in this module:</b> <code>providers/template-generator.ts</code> (rich prompt builder using technicalSpecs jsonb) and <code>templates/{base,react,flutter,html}.ts</code> are <b>never imported</b> by any route or component. They look like an abandoned v2 of the generation pipeline for the template system.
+</div>
+
+<h2 id="payments">11. Payments Module — <code>src/lib/payments/</code></h2>
+<div class="grid2">
+<div class="card">
+<h4>Stripe (<code>stripe.ts</code>) — USD</h4>
+<ul>
+<li><code>getStripeClient()</code> — API version 2026-02-25.clover</li>
+<li><code>createCheckoutSession()</code> — subscription mode, card</li>
+<li><code>createCustomerPortalSession()</code></li>
+<li><code>constructWebhookEvent()</code> — signature verify</li>
+</ul>
+</div>
+<div class="card">
+<h4>Razorpay (<code>razorpay.ts</code>) — INR</h4>
+<ul>
+<li><code>getRazorpayClient()</code></li>
+<li><code>createSubscription()</code> — plan_id, 12 cycles</li>
+<li><code>verifyWebhookSignature()</code> — HMAC timing-safe</li>
+</ul>
+</div>
+</div>
+<div class="callout red">
+<b>Payments are NOT wired end-to-end:</b> no checkout API route calls <code>createCheckoutSession</code>/<code>createSubscription</code> (the /upgrade page has no purchase flow), and both webhooks are stubs — so <b>tier upgrades, credit resets and payment recording never happen automatically</b>. The subscriptions/payments tables can only be filled manually today.
+</div>
+
+<h2 id="email-storage">12. Email & Storage</h2>
+<div class="grid2">
+<div class="card">
+<h4>Email — Resend (<code>lib/email/index.ts</code>)</h4>
+<ul>
+<li><code>sendMagicLinkEmail()</code> — 15-min link, purple branded HTML</li>
+<li><code>sendWelcomeEmail()</code> — onboarding email</li>
+<li>From: <code>EMAIL_FROM</code> env → default <code>Promtify &lt;hello@promtify.dev&gt;</code></li>
+</ul>
+<p class="bad">⚠ Neither function is called anywhere. Also env files define <code>FROM_EMAIL</code> but code reads <code>EMAIL_FROM</code> — name mismatch.</p>
+</div>
+<div class="card">
+<h4>Storage — Vercel Blob (<code>lib/storage.ts</code>)</h4>
+<ul>
+<li><code>uploadFile(file, filename)</code> — public access</li>
+<li><code>deleteFile(url)</code> — via authorization header</li>
+</ul>
+<p class="bad">⚠ Never imported anywhere. Prompt/blog image URLs are entered manually; next.config allows <code>**.vercel-storage.com</code> images.</p>
+</div>
+</div>
+
+<h2 id="state">13. State Management</h2>
+<table>
+<tr><th>Layer</th><th>Piece</th><th>Contents</th></tr>
+<tr><td rowspan="3">Zustand</td><td><code>stores/ui-store.ts</code></td><td>sidebarOpen, currency (USD/INR) — used by pricing + app shell</td></tr>
+<tr><td><code>stores/generator-store.ts</code></td><td>Full generator state machine: status (idle→validating→checking_credits→generating→success/error), config fields, output, <code>generate()</code> action calling /api/generate</td></tr>
+<tr><td><code>stores/auth-store.ts</code></td><td>Auth modal open state + mode + callbackUrl</td></tr>
+<tr><td>React Query</td><td><code>providers/query-provider.tsx</code></td><td>QueryClient wrapper (used in root providers)</td></tr>
+<tr><td rowspan="2">Hooks (active)</td><td><code>hooks/use-auth.ts</code></td><td>Wraps better-auth useSession — used by 8 files</td></tr>
+<tr><td><code>hooks/use-credits.ts</code></td><td>Credit balance polling — used by 3 files</td></tr>
+<tr><td>Hooks (dead)</td><td colspan="2"><span class="warn"><code>use-favorites</code>, <code>use-generator</code>, <code>use-media-query</code>, <code>use-prompts</code> — 0 imports each</span></td></tr>
+</table>
+
+<h2 id="tiers">14. Tiers, Credits & Pricing</h2>
+<div class="callout green"><b>Updated 2026-07-17 — live plan structure (lifetime one-time):</b> <code>basic</code> = Figma templates · <code>pro</code> = Figma + AI prompts · <code>premium</code> = code + Figma + AI prompts · <code>courses-addon</code> $7 · AI generation + marketplace = next launch (product inactive). Plans grant <code>feature templates:&lt;asset_kind&gt;</code> entitlements. <b>Products are now DB-backed</b> (<code>products</code> table, migration 0004, seeded on staging+production): admin edits prices/grants/active at <b>admin → Plans &amp; Pricing</b> (<code>/api/admin/products</code> CRUD); checkout + webhooks resolve via <code>lib/products.ts</code> (DB first, config fallback + dynamic <code>template:/course:</code> SKUs); pricing pages fetch live prices from <code>GET /api/products</code> (static config = fallback + seed via <code>pnpm db:seed-products[:production]</code>, non-clobbering). Admin → Users can hand any user a plan manually ("Give plan…" applies the product's grants as <code>admin_grant</code>) and view/revoke individual entitlements per user. Prices besides the $7 add-on are placeholders — edit them in the admin panel. The table below describes the OLD tier model — tier is now only a label/badge.</div>
+<table>
+<tr><th>Tier</th><th>Price (USD)</th><th>Price (INR)</th><th>Prompt copies</th><th>AI gens/mo</th><th>Courses</th></tr>
+<tr><td>free</td><td>$0</td><td>₹0</td><td>5</td><td>0</td><td>✗</td></tr>
+<tr><td>starter</td><td>$9 one-time <span class="dim">(anchor $19, Save 52%)</span></td><td>₹499 one-time</td><td>50</td><td>0</td><td>✗</td></tr>
+<tr><td>pro <span class="dim">(popular)</span></td><td>$15/mo · $99/yr</td><td>₹999/mo · ₹4999/yr</td><td>∞</td><td>100</td><td>✓</td></tr>
+<tr><td>team</td><td>$49/mo</td><td>₹2999/mo</td><td>∞</td><td>500 (5 seats)</td><td>✓</td></tr>
+</table>
+<p class="small">Sources: <code>config/pricing.ts</code> (display), <code>lib/utils/constants.ts</code> (TIER_LIMITS enforcement, TIER_CREDITS, hasTierAccess()). Note: TIER_CREDITS.free=5 vs users.credits default 0 — free users get 0 credits at signup; credit granting/reset logic is not implemented (depends on missing webhook work).</p>
+
+<h2 id="env">15. Environment Variables</h2>
+<table>
+<tr><th>Group</th><th>Vars</th><th>Consumed by</th></tr>
+<tr><td>Database</td><td><code>DATABASE_URL</code>, <code>DATABASE_URL_STAGING</code>, <code>DATABASE_URL_PRODUCTION</code></td><td>lib/db, lib/auth, drizzle configs, scripts/migrate (NODE_ENV switches)</td></tr>
+<tr><td>Auth</td><td><code>BETTER_AUTH_SECRET</code>, <code>BETTER_AUTH_URL</code>, <code>GOOGLE_CLIENT_ID/SECRET</code>, <code>GITHUB_CLIENT_ID/SECRET</code></td><td>lib/auth/index.ts</td></tr>
+<tr><td>Domains</td><td><code>NEXT_PUBLIC_ROOT_DOMAIN</code>, <code>NEXT_PUBLIC_APP_URL</code>, <code>NEXT_PUBLIC_APP_SUBDOMAIN_URL</code>, <code>NEXT_PUBLIC_ADMIN_SUBDOMAIN_URL</code></td><td>proxy.ts, config/site.ts, auth</td></tr>
+<tr><td>AI</td><td><code>ANTHROPIC_API_KEY</code>, <code>OPENAI_API_KEY</code></td><td>lib/ai/providers</td></tr>
+<tr><td>Payments</td><td><code>STRIPE_SECRET_KEY</code>, <code>STRIPE_WEBHOOK_SECRET</code>, <code>RAZORPAY_KEY_ID/KEY_SECRET/WEBHOOK_SECRET</code></td><td>lib/payments, webhooks</td></tr>
+<tr><td>Email</td><td><code>RESEND_API_KEY</code>, <code>EMAIL_FROM</code> <span class="bad">(env files say FROM_EMAIL — mismatch)</span></td><td>lib/email (currently unused)</td></tr>
+<tr><td>Storage</td><td><code>BLOB_READ_WRITE_TOKEN</code></td><td>lib/storage (currently unused)</td></tr>
+<tr><td>Rate limit</td><td><code>UPSTASH_REDIS_REST_URL/TOKEN</code></td><td><span class="warn">Nothing — deps installed, never used</span></td></tr>
+<tr><td>Admin</td><td><code>ADMIN_SETUP_KEY</code></td><td>/api/admin/setup <span class="dim">(not in .env.example)</span></td></tr>
+</table>
+<p class="small">Note: <code>.env.example</code> AND <code>env.template</code> both exist (duplicates); <code>.env.local</code> has duplicate <code>FROM_EMAIL</code> and <code>RESEND_API_KEY</code> lines.</p>
+
+<h2 id="scripts">16. Scripts & Tooling — <code>scripts/</code></h2>
+<table>
+<tr><th>Script</th><th>pnpm command</th><th>Purpose</th></tr>
+<tr><td><code>migrate.ts</code></td><td><code>db:migrate[:staging|:production]</code></td><td>Run drizzle migrations against env-selected DB</td></tr>
+<tr><td><code>seed.ts</code></td><td><code>db:seed[:*]</code></td><td>Base seed (categories, sample data)</td></tr>
+<tr><td><code>seed-prompts-md.ts</code></td><td><code>db:seed-prompts[:*]</code></td><td>Seed prompts from markdown</td></tr>
+<tr><td><code>seed-templates.ts</code></td><td><code>db:seed-templates[:*]</code></td><td>Parse <code>scripts/prompts/*.md</code> (23 template files) with gray-matter frontmatter → prompts table (detailed_prompt, technical_specs)</td></tr>
+<tr><td><code>seed-hero-prompts.ts</code>, <code>seed-user.ts</code>, <code>create-test-user.ts</code>, <code>test-auth.ts</code>, <code>check-migrations.ts</code>, <code>create-admin.ts</code></td><td class="dim">(no npm script for most)</td><td>Dev utilities; create-admin bcrypt-creates an admin locally</td></tr>
+<tr><td><code>scaffold-component.ts</code></td><td><code>scaffold:component|api|action|validation</code></td><td>Code generator for new components/routes</td></tr>
+</table>
+<p>Drizzle configs: <code>drizzle.config.ts</code> (dev), <code>drizzle.staging.config.ts</code>, <code>drizzle.production.config.ts</code> — same schema, different DATABASE_URL env.</p>
+
+<h2 id="deploy">17. Deployment & CI/CD</h2>
+<ul>
+<li><b>vercel.json</b> — buildCommand <code>rm -rf .next && pnpm build</code>, telemetry disabled.</li>
+<li><b>.github/workflows/deploy-staging.yml</b> — deploys <code>staging</code> branch → staging env (staging DB, staging domain).</li>
+<li><b>.github/workflows/deploy-production.yml</b> — deploys <code>main</code> → production.</li>
+<li><b>Branch model:</b> work on <code>staging</code> (current branch) → merge to <code>main</code> for production.</li>
+<li><b>Security headers</b> (next.config.ts): HSTS w/ subdomains+preload, X-Frame-Options SAMEORIGIN, nosniff, referrer-policy, DNS prefetch.</li>
+<li><b>Image domains:</b> *.vercel-storage.com, avatars.githubusercontent.com.</li>
+</ul>
+
+<h2 id="issues">18. ⚠️ Issues & Incomplete Work Found During Audit</h2>
+<div class="callout red"><b>1. Payments not functional end-to-end.</b> No checkout initiation route; both webhook handlers are TODO stubs. Buying/upgrading cannot complete → tiers/credits never update automatically.</div>
+<div class="callout red"><b>2. Env var name mismatch.</b> Code reads <code>EMAIL_FROM</code>; .env.local/.env.example define <code>FROM_EMAIL</code>. Emails (when wired) would fall back to default sender.</div>
+<div class="callout red"><b>3. <code>bcryptjs</code> is a devDependency</b> but imported by the production route <code>/api/admin/setup</code> and <code>scripts/create-admin.ts</code>. On a prod install without devDeps this route crashes. Move to dependencies (or drop the route post-setup).</div>
+<div class="callout"><b>4. Email + Storage modules are orphaned.</b> Resend and Vercel Blob helpers exist but are never invoked (no welcome email on signup, no upload UI in admin forms).</div>
+<div class="callout"><b>5. Rate limiting missing.</b> @upstash/ratelimit + redis installed with env vars but no limiter anywhere — /api/generate is unprotected beyond credits.</div>
+<div class="callout"><b>6. Old AI model IDs.</b> claude-sonnet-4-20250514 and gpt-4-turbo are outdated; costUsd is hardcoded '0'.</div>
+<div class="callout"><b>7. Free-tier credits inconsistency.</b> TIER_CREDITS.free=5 but users.credits defaults to 0 and nothing grants/resets credits.</div>
+<div class="callout"><b>8. Both <code>framer-motion</code> and <code>motion</code> installed</b> (same library, old + new name). 4 files use framer-motion, 1 uses motion/react — consolidate to <code>motion</code>.</div>
+<div class="callout"><b>9. /api/admin/setup live in prod</b> guarded only by a header key; recommended to remove after bootstrap.</div>
+<div class="callout"><b>10. proxy.ts admin gate checks cookie presence only</b> — role enforcement relies on layouts/APIs (currently OK, but layout must never skip the check).</div>
+
+<h2 id="unused">19. 🗑️ Unused Files & Dead Code — Phase 2 Deletion Candidates</h2>
+<p class="lead">Verified by import-graph scan (grep across src/). <span class="ok">✅ Executed 2026-07-17:</span> sections A + B deleted, section D deps removed (framer-motion migrated to <code>motion/react</code>, shadcn moved to devDeps; @upstash kept for future rate limiting). Section C intentionally kept — see notes per row.</p>
+
+<h3>A. Source files with zero imports (safe deletes)</h3>
+<table>
+<tr><th>File</th><th>Why dead</th></tr>
+<tr><td><code>src/components/auth/login-form.tsx</code></td><td>Superseded by auth-form.tsx</td></tr>
+<tr><td><code>src/components/auth/signup-form.tsx</code></td><td>Superseded by auth-form.tsx</td></tr>
+<tr><td><code>src/components/shared/currency-toggle.tsx</code></td><td>Pricing cards implement their own toggle</td></tr>
+<tr><td><code>src/components/shared/error-boundary.tsx</code></td><td>Never mounted</td></tr>
+<tr><td><code>src/components/shared/empty-state.tsx</code></td><td>Never used</td></tr>
+<tr><td><code>src/components/shared/loading-spinner.tsx</code></td><td>Never used</td></tr>
+<tr><td><code>src/components/admin/prompts-table.tsx</code></td><td>Admin prompts page renders its own table</td></tr>
+<tr><td><code>src/components/generator/live-preview.tsx</code></td><td>Replaced by code-preview</td></tr>
+<tr><td><code>src/components/generator/style-options.tsx</code></td><td>Folded into generator-form</td></tr>
+<tr><td><code>src/components/generator/framework-selector.tsx</code></td><td>Folded into generator-form</td></tr>
+<tr><td><code>src/hooks/use-favorites.ts</code>, <code>use-generator.ts</code>, <code>use-media-query.ts</code>, <code>use-prompts.ts</code></td><td>0 imports each (pages fetch directly / use stores)</td></tr>
+<tr><td><code>src/lib/validations/prompts.ts</code></td><td>0 imports</td></tr>
+<tr><td><code>src/lib/ai/providers/template-generator.ts</code></td><td>Abandoned v2 pipeline, never imported</td></tr>
+<tr><td><code>src/lib/ai/templates/base.ts, react.ts, flutter.ts, html.ts</code></td><td>Only imported by each other / template-generator</td></tr>
+</table>
+
+<h3>B. Stray content / clutter files</h3>
+<table>
+<tr><th>Path</th><th>Note</th></tr>
+<tr><td><code>public/1.md</code>, <code>public/docs/1.md … 17.md</code> (18 files)</td><td>Untracked scratch markdown served publicly — likely paste dumps</td></tr>
+<tr><td><code>.DS_Store</code> (5×: root, public, src, src/app, src/components, src/lib)</td><td>macOS junk — also add to .gitignore</td></tr>
+<tr><td><code>tsconfig.tsbuildinfo</code></td><td>Build artifact — gitignore</td></tr>
+<tr><td><code>env.template</code></td><td>Duplicate of .env.example</td></tr>
+</table>
+
+<h3>C. Keep-but-decide (functional code that is currently orphaned)</h3>
+<table>
+<tr><th>Item</th><th>Recommendation</th></tr>
+<tr><td><code>src/lib/email/index.ts</code></td><td>Keep if you plan to wire welcome/magic-link emails in Phase 1/2; else delete + drop resend dep</td></tr>
+<tr><td><code>src/lib/storage.ts</code></td><td>Keep if admin image upload is planned; else delete + drop @vercel/blob</td></tr>
+<tr><td><code>magic_links</code> table in schema</td><td>Drop via migration if magic-link login is off the roadmap (better-auth has its own flow)</td></tr>
+<tr><td><code>content_format</code> enum</td><td>Unused enum — drop with next migration</td></tr>
+<tr><td>Webhook routes (stubs)</td><td>Keep — needed for Phase payments work</td></tr>
+<tr><td>Old docs: <code>public/docs/promptship-*.html</code>, root <code>*.md</code> guides (ADMIN-SETUP, AGENT-SYSTEM, TEMPLATE-SYSTEM, PROMPTSHIP-CLAUDE-CODE-PROMPT, AGENTS.md…)</td><td><span class="ok">✅ Deleted 2026-07-17</span> — along with the <code>(docs)</code> route group, its nav/footer links, the proxy matcher exclusion, and cursor/windsurf/opencode tool configs. This file is now the single reference. Kept: README.md, .mcp.json + .claude/ + .agent/ (active Claude Code config), scripts/prompts/*.md (seed data).</td></tr>
+</table>
+
+<h3>D. Unused npm dependencies (removable)</h3>
+<table>
+<tr><th>Package</th><th>Evidence</th></tr>
+<tr><td><code>@upstash/ratelimit</code>, <code>@upstash/redis</code></td><td>0 imports (unless you add rate limiting — recommended to USE rather than remove)</td></tr>
+<tr><td><code>nanoid</code></td><td>0 imports (crypto.randomUUID used instead)</td></tr>
+<tr><td><code>@radix-ui/react-toast</code></td><td>sonner is the toast system</td></tr>
+<tr><td><code>framer-motion</code></td><td>Migrate 4 files to <code>motion</code> and remove</td></tr>
+<tr><td><code>shadcn</code></td><td>CLI tool — belongs in devDependencies, not dependencies</td></tr>
+<tr><td><code>@better-fetch/fetch</code>, <code>tailwindcss-animate</code></td><td>Verify — likely transitive/legacy (tw-animate-css is the v4-era one)</td></tr>
+</table>
+
+<h2 id="target">20. 🎯 Target Architecture Plan <span class="dim">(reviewed 2026-07-17)</span></h2>
+<p class="lead">Architecture review for the product pivot: <b>template store</b> (code / Figma / AI-prompt templates, free + paid, granular access) now; courses, AI editing, and a seller marketplace later. Also fixes the two operational pain points: local subdomain auth and admin security.</p>
+
+<h3>20.1 Root cause: why auth breaks on localhost</h3>
+<div class="callout red">
+<b>The session cookie is host-only in dev.</b> <code>lib/auth/index.ts:58</code> sets cookie <code>domain: undefined</code> when the root domain contains "localhost". A cookie set while logging in on <code>app.localhost:3000</code> is therefore <b>never sent</b> to <code>admin.localhost:3000</code> or <code>localhost:3000</code> — so cross-subdomain login, role redirects, and the admin portal all fail locally while working in production (where <code>.promtify.dev</code> is shared). Safari additionally doesn't resolve <code>*.localhost</code> at all.
+</div>
+<p><b>Fix — use a real wildcard dev domain so all three environments behave identically:</b></p>
+<table>
+<tr><th>Env</th><th><code>NEXT_PUBLIC_ROOT_DOMAIN</code></th><th>Cookie domain</th><th>URLs</th></tr>
+<tr><td>Local</td><td><code>lvh.me:3000</code> <span class="dim">(public DNS → 127.0.0.1, zero setup; or <code>promtify.local</code> via /etc/hosts)</span></td><td><code>.lvh.me</code></td><td>lvh.me:3000 · app.lvh.me:3000 · admin.lvh.me:3000</td></tr>
+<tr><td>Staging</td><td><code>staging.promtify.dev</code></td><td><code>.staging.promtify.dev</code></td><td>staging. · app.staging. · admin.staging.</td></tr>
+<tr><td>Production</td><td><code>promtify.dev</code></td><td><code>.promtify.dev</code></td><td>promtify.dev · app. · admin.</td></tr>
+</table>
+<pre><code>// lib/auth/index.ts — one rule for every environment, no localhost special case
+const cookieDomain = '.' + rootDomain.split(':')[0];   // .lvh.me / .staging.promtify.dev / .promtify.dev
+advanced: {
+  cookiePrefix: 'ps',
+  defaultCookieAttributes: { sameSite: 'lax', secure: protocol === 'https', domain: cookieDomain },
+}</code></pre>
+<p class="small">With this, local ≡ staging ≡ production in topology; only the env var differs. Each environment already has its own DB (3 drizzle configs) and its own OAuth redirect URIs — add the staging + lvh.me callback URLs in the Google/GitHub consoles. The 5-min <code>cookieCache</code> also means role/tier changes take up to 5 min to propagate — acceptable, but know it.</p>
+
+<h3>20.2 Admin security hardening</h3>
+<div class="callout red"><b>CRITICAL — mass-assignment at signup:</b> <code>role</code>, <code>tier</code>, <code>credits</code> are declared as better-auth <code>additionalFields</code> <b>without <code>input: false</code></b>. better-auth accepts additional fields from the sign-up request body unless input is disabled — meaning a crafted <code>POST /api/auth/sign-up/email</code> with <code>{"role":"admin"}</code> could self-provision an admin. Fix immediately: add <code>input: false</code> to all three fields (they are only ever set server-side / by webhooks).</div>
+<table>
+<tr><th>Measure</th><th>Detail</th></tr>
+<tr><td>1. <code>input: false</code> on role/tier/credits</td><td>Closes signup mass-assignment (above). <b>Do first.</b></td></tr>
+<tr><td>2. Delete <code>/api/admin/setup</code></td><td>Bootstrap admins only via <code>scripts/create-admin.ts</code> run locally against the target DB. No admin-creation surface in the deployed app at all.</td></tr>
+<tr><td>3. Keep layout + API dual enforcement</td><td><code>(admin)/layout.tsx</code> role check (exists ✓) + <code>requireAdmin()</code> on every admin API (exists ✓). Add a unit test asserting every <code>/api/admin/*</code> route imports requireAdmin, so a new route can't forget it.</td></tr>
+<tr><td>4. Enable better-auth rate limiting</td><td>Built-in <code>rateLimit</code> option — protects login/signup from credential stuffing. Back with Upstash Redis (already installed) in prod.</td></tr>
+<tr><td>5. 2FA for admin accounts</td><td>better-auth <code>twoFactor()</code> plugin; enforce for <code>role=admin</code> at login. Phase-1-optional, cheap insurance.</td></tr>
+<tr><td>6. Don't advertise the admin portal</td><td>Non-admin hitting admin.* already gets redirected; keep admin URL out of all marketing/app UI. Optionally return 404 instead of redirect to avoid confirming the portal exists.</td></tr>
+</table>
+
+<h3>20.3 Entitlements — the core model for the template business</h3>
+<p>The requirement — <i>"some users get all access, some one template, some one full category (e.g. all Figma templates), free templates for everyone, payment plans decided later, courses/AI/marketplace as add-ons"</i> — cannot be expressed by the current single <code>users.tier</code> column. The scalable answer is an <b>entitlements table</b>: one row = one grant of access. Pricing/packaging then becomes pure configuration — any future plan (bundle, single sale, subscription, promo, marketplace purchase) just creates entitlement rows, and the access check never changes.</p>
+<pre><code>-- New tables (Drizzle migration)
+entitlements (
+  id, user_id FK,
+  scope        enum: 'all' | 'category' | 'template' | 'course' | 'feature',   -- feature = ai_generate, marketplace_sell…
+  scope_id     text NULL,          -- category_id / template_id / module_id; NULL for 'all'
+  source       enum: 'purchase' | 'subscription' | 'admin_grant' | 'promo' | 'marketplace',
+  order_id     FK NULL, expires_at timestamptz NULL,   -- NULL = lifetime; set for subscriptions
+  revoked_at   timestamptz NULL, created_at,
+  UNIQUE (user_id, scope, scope_id)
+)
+-- prompts table evolves into the template catalog it already almost is:
+--   + asset_kind enum 'code'|'figma'|'ai_prompt'  + is_free bool  + asset files (see 20.4)
+--   tier/is_premium columns become display hints only; access = entitlements</code></pre>
+<pre><code>// lib/access/index.ts — THE single gate, used by every API route and UI element
+export async function canAccessTemplate(userId: string | null, t: Template) {
+  if (t.isFree) return true;
+  if (!userId) return false;
+  return await hasEntitlement(userId, [
+    { scope: 'all' },
+    { scope: 'category', scopeId: t.categoryId },
+    { scope: 'template', scopeId: t.id },
+  ]); // one indexed query; expires_at > now(), revoked_at IS NULL
+}</code></pre>
+<ul>
+<li><b>Browse & search are public</b> (marketing + app): full gallery with previews for SEO and conversion. Only the <b>download/copy</b> action is gated by <code>canAccessTemplate()</code> — locked items show price/upgrade CTA.</li>
+<li><b>Generator panel deprioritized:</b> /generate leaves the main nav; AI becomes a Phase-2 add-on (<code>feature:ai_generate</code> entitlement + existing credits system). No code deleted — just de-emphasized.</li>
+<li><b>Admin grants:</b> admin UI writes <code>source: admin_grant</code> rows — support/refund/comp cases need zero special code.</li>
+</ul>
+
+<h3>20.4 Paid asset delivery — never through <code>/public</code></h3>
+<div class="callout"><b>Anything in <code>public/</code> is downloadable by URL-guessing.</b> Paid template files (code zips, .fig files, prompt packs) must live in private storage.</div>
+<ol>
+<li>Store paid files in Vercel Blob with <code>access: 'private'</code> (the orphaned <code>lib/storage.ts</code> finally gets its job) — or Cloudflare R2 if egress cost matters later.</li>
+<li>Single endpoint: <code>GET /api/templates/[id]/download?file=…</code> → session → <code>canAccessTemplate()</code> → issue <b>short-lived signed URL</b> (60s) → record row in <code>template_downloads</code> (analytics + abuse detection).</li>
+<li>Free templates can serve through the same endpoint (uniform code path, still counted).</li>
+</ol>
+
+<h3>20.5 Purchase flow (provider-agnostic, plans pluggable later)</h3>
+<pre><code>UI "Buy" → POST /api/checkout { productId }        ─ product = {kind: all_access|category|template|course, scopeId, prices}
+        → Stripe Checkout (USD) / Razorpay (INR)    ─ metadata: { userId, productId }
+        → webhook (signature-verified, idempotent by event id)
+        → INSERT payments row + INSERT entitlement rows for the product
+        → user refreshes → access live everywhere (one source of truth)</code></pre>
+<p class="small">This fills the two TODO-stub webhooks with exactly one job each: <b>translate a paid event into entitlement rows</b>. A <code>products</code> config table (or typed config file at first) maps sellable SKUs → entitlement grants, so pricing experiments never touch access logic. Subscriptions set <code>expires_at</code> = period end; renewal webhooks extend it; cancellation simply lets it lapse.</p>
+
+<h3>20.6 Phase 2 — everything is already an entitlement</h3>
+<table>
+<tr><th>Add-on</th><th>How it lands on this architecture</th></tr>
+<tr><td>Courses</td><td>Tables exist. Gate lessons with <code>scope: 'course', scope_id: module_id</code> (or bundle into <code>all</code>). Sell like any product via 20.5.</td></tr>
+<tr><td>AI editing / AI template generation</td><td><code>feature: ai_generate</code> entitlement + existing <code>credits</code> counter for metering. Existing lib/ai pipeline reused; add rate limiting (Upstash) on the endpoint.</td></tr>
+<tr><td>Marketplace (users sell templates, you take %)</td><td><code>sellers</code> (user_id, stripe_connect_account_id / razorpay_route_account) + <code>listings</code> (template_id, status: draft→review→live — admin approves in existing CMS). Checkout uses <b>Stripe Connect destination charges / Razorpay Route</b> with <code>application_fee_percent</code> = your cut, so split + payout are the provider's problem, not a ledger you maintain. Buyer's webhook grants a normal <code>scope: template</code> entitlement — buyers don't care who the seller is. Add <code>seller_id, platform_fee, seller_amount</code> to payments for reporting.</td></tr>
+</table>
+
+<h3>20.7 Maintainability guardrails</h3>
+<ul>
+<li><b>Structural subdomain rewrites:</b> replace the hand-maintained <code>appOnlyRoutes</code> list in proxy.ts with prefix rewrites (root→<code>/(marketing)</code> paths only, app.*→app pages, admin.*→<code>/admin/*</code> — the admin pattern applied to all three). New pages then route correctly with zero proxy edits (today <code>/templates</code> and <code>/upgrade</code> are already missing from the list).</li>
+<li><b>One domain helper</b> (<code>config/site.ts</code> already close): every URL built from <code>NEXT_PUBLIC_ROOT_DOMAIN</code>; grep-ban hardcoded domains.</li>
+<li><b>Tests where regressions hurt:</b> vitest units for <code>proxy.ts</code> (host+path+cookie → decision table), <code>lib/access</code> (entitlement matrix), webhook handlers (event → entitlement rows, idempotency). These three files ARE the business.</li>
+<li><b>Keep the single-app monolith.</b> Entitlements + structural rewrites remove the reasons it hurts; splitting apps now would only multiply auth/deploy surface.</li>
+</ul>
+
+<h3>20.8 Build order</h3>
+<table>
+<tr><th>Phase</th><th>Scope</th></tr>
+<tr><td><b>0 — Fix now</b> <span class="ok">✅ Done 2026-07-17</span></td><td>lvh.me dev domain + unified cookie rule (20.1) · <code>input: false</code> on role/tier/credits · deleted /api/admin/setup (admins via <code>pnpm admin:create[:production]</code>, creds in .env.local, scrypt via better-auth/crypto — old bcrypt script produced unverifiable hashes) · better-auth rateLimit (5/min on sign-in/up) · structural rewrites for app.* ((app) pages moved under <code>(app)/app/</code>) · 19 vitest proxy tests (<code>pnpm test</code>) · auth redirect helpers de-localhost-ified · admin redirect fixed (<code>admin.*/</code>, was /admin → 404)</td></tr>
+<tr><td><b>1 — Template store</b> <span class="ok">✅ Done 2026-07-17</span></td><td>Migration <code>0001</code> applied to staging+production (entitlements, template_downloads, prompts.asset_kind/is_free/asset_url; is_free backfilled from tier). <code>lib/access</code> = single gate (pure matcher + 13 tests) · <code>config/products.ts</code> SKUs (placeholder prices, incl. dynamic <code>template:&lt;id&gt;</code>) · <code>POST /api/checkout</code> (Stripe USD inline price_data; Razorpay INR order for client widget) · both webhooks → <code>lib/payments/fulfill.ts</code> (idempotent payment + grants; renewals extend expiry) · <code>GET /api/templates/[id]/download</code> gated + logged · <code>/api/admin/upload</code> (Blob, random-suffix URLs) + <code>/api/admin/entitlements</code> GET/POST/DELETE (grant/revoke by email) · prompts list/detail APIs strip paid promptText and return <code>hasAccess</code> (leak fixed) · copy route enforces entitlements · card/modal show PAID badge + Get Access CTA → <code>/upgrade?product=…</code>. <b>Left for plan decisions:</b> /upgrade purchase UI (products are placeholders), Razorpay client widget, INR subscriptions.</td></tr>
+<tr><td><b>2 — Add-ons</b> <span class="ok">✅ Done 2026-07-17</span></td><td>Courses: <code>/api/courses</code> returns per-module <code>hasAccess</code> + strips locked video URLs (leak fixed, free previews stay open); <code>/api/progress</code> enforces module access; products <code>all-courses</code> + dynamic <code>course:&lt;moduleId&gt;</code>; blanket <code>feature:courses</code> pass. AI: <code>/api/generate</code> gated by <code>feature:ai_generate</code> entitlement (all-access covers) + credits + Upstash sliding-window rate limit (<code>lib/rate-limit.ts</code>, fails open when unconfigured); product <code>ai-generate-monthly</code>. 2FA: better-auth <code>twoFactor()</code> plugin + <code>two_factors</code> table (migration <code>0003</code> on staging+production), <code>/verify-2fa</code> challenge page, sign-in intercepts <code>twoFactorRedirect</code>, CLI enrollment <code>pnpm admin:2fa[:production]</code> prints otpauth URI + 10 backup codes (verified end-to-end with a throwaway user). <b>UI debt:</b> /learn page still renders demo data with tier badges — server enforcement is live regardless.</td></tr>
+<tr><td><b>3 — Marketplace</b></td><td>Stripe Connect / Razorpay Route onboarding · listings + review workflow · fee reporting</td></tr>
+</table>
+
+<p class="small" style="margin-top:40px; border-top:1px solid var(--border); padding-top:16px;">Generated from a file-by-file source audit of the <code>staging</code> branch · Promtify (promptship repo) · This document intentionally ignores README.md / ARCHITECTURE.md content.</p>
+
+</main>
+</div>
+</body>
+</html>

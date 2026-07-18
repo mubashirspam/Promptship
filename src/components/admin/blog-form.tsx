@@ -14,7 +14,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { MarkdownEditor } from '@/components/admin/markdown-editor';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Upload } from 'lucide-react';
+import { uploadAdminFile } from '@/lib/upload-client';
 
 interface BlogFormProps {
   initialData?: {
@@ -51,8 +52,10 @@ export function BlogForm({ initialData }: BlogFormProps) {
   const [excerpt, setExcerpt] = useState(initialData?.excerpt ?? '');
   const [content, setContent] = useState(initialData?.content ?? '');
   const [coverImageUrl, setCoverImageUrl] = useState(initialData?.coverImageUrl ?? '');
+  const [uploadingCover, setUploadingCover] = useState(false);
   const [status, setStatus] = useState(initialData?.status ?? 'draft');
-  const [category, setCategory] = useState(initialData?.category ?? '');
+  // Radix Select forbids empty-string item values — 'none' = no category
+  const [category, setCategory] = useState(initialData?.category ?? 'none');
   const [tagsInput, setTagsInput] = useState((initialData?.tags ?? []).join(', '));
 
   function generateSlug(text: string) {
@@ -88,7 +91,7 @@ export function BlogForm({ initialData }: BlogFormProps) {
       content,
       coverImageUrl: coverImageUrl || null,
       status,
-      category: category || null,
+      category: category === 'none' ? null : category,
       tags,
     };
 
@@ -192,7 +195,7 @@ export function BlogForm({ initialData }: BlogFormProps) {
                   <SelectValue placeholder="Select category" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">None</SelectItem>
+                  <SelectItem value="none">None</SelectItem>
                   {BLOG_CATEGORIES.map((c) => (
                     <SelectItem key={c} value={c}>
                       {c}
@@ -203,12 +206,55 @@ export function BlogForm({ initialData }: BlogFormProps) {
             </div>
 
             <div className="space-y-2">
-              <Label>Cover Image URL</Label>
-              <Input
-                value={coverImageUrl}
-                onChange={(e) => setCoverImageUrl(e.target.value)}
-                placeholder="https://..."
-              />
+              <Label>Cover Image</Label>
+              <div className="flex gap-2">
+                <Input
+                  value={coverImageUrl}
+                  onChange={(e) => setCoverImageUrl(e.target.value)}
+                  placeholder="Upload → or paste URL"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  className="shrink-0"
+                  disabled={uploadingCover}
+                  onClick={() => document.getElementById('cover-image-input')?.click()}
+                  aria-label="Upload cover image"
+                >
+                  {uploadingCover ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : (
+                    <Upload className="size-4" />
+                  )}
+                </Button>
+                <input
+                  id="cover-image-input"
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={async (e) => {
+                    const f = e.target.files?.[0];
+                    e.target.value = '';
+                    if (!f) return;
+                    setUploadingCover(true);
+                    try {
+                      setCoverImageUrl(await uploadAdminFile(f, 'image'));
+                    } catch (err) {
+                      setError(err instanceof Error ? err.message : 'Upload failed');
+                    } finally {
+                      setUploadingCover(false);
+                    }
+                  }}
+                />
+              </div>
+              {coverImageUrl && (
+                <img
+                  src={coverImageUrl}
+                  alt="cover preview"
+                  className="h-16 rounded-md border object-cover"
+                />
+              )}
             </div>
           </div>
 

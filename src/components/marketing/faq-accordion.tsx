@@ -11,42 +11,42 @@ const faqItems = [
   {
     question: "What is Promtify?",
     answer:
-      "Promtify is a curated library of 100+ UI prompts paired with AI-powered code generation. It helps developers build beautiful, production-ready interfaces in minutes instead of hours - across React, Flutter, HTML, and Vue.",
+      "Promtify is a premium template marketplace: Figma Kits, AI Prompts and Code Starters for web and mobile apps. Browse everything free, then pay once for lifetime access — download the design file, copy the prompt, or grab the full source code.",
   },
   {
-    question: "What frameworks are supported?",
+    question: "Which frameworks and platforms are covered?",
     answer:
-      "Promtify currently supports React (with Tailwind CSS), Flutter (Dart), plain HTML/CSS, and Vue.js. Each prompt generates framework-specific, idiomatic code that follows best practices for the chosen framework.",
+      "Web: React, Next.js, Vue and HTML/CSS. Mobile: Flutter, React Native, Kotlin and Swift. Every template is tagged by platform and stack, and Figma Kits cover both web and mobile app designs.",
   },
   {
-    question: "How does AI generation work?",
+    question: "What exactly do I get when I unlock a template?",
     answer:
-      "Select a prompt, choose your target framework, and click generate. Our AI engine (powered by Claude and GPT-4) takes the curated prompt and produces clean, production-ready component code with proper styling, accessibility, and responsive design built in.",
+      "Figma Kits give you the Figma file link to duplicate and edit. AI Prompts give you the full markdown prompt to paste into Claude, Cursor or v0. Code Starters give you a downloadable zip with complete source. Many templates include a prompt alongside the design or code.",
   },
   {
-    question: "Is there a free plan?",
+    question: "Do I have to pay to try it?",
     answer:
-      "Yes! You can browse and preview all prompts for free. The Starter plan gives you access to 50 premium prompts with a one-time purchase. For unlimited access, AI generation, and courses, check out our Pro plan.",
+      "No. Browsing and previews are completely free, and free templates are usable by everyone. Paid templates unlock with a plan — Basic (all Figma Kits), Pro (adds all AI Prompts) or Premium (adds all Code Starters) — or buy any single template on its own.",
   },
   {
-    question: "Can I cancel my subscription?",
+    question: "Is it really a one-time payment?",
     answer:
-      "Absolutely. You can cancel your Pro or Team subscription at any time from your account settings. You will retain access to all features until the end of your current billing period. There are no cancellation fees.",
+      "Yes. Every plan is a single lifetime purchase — no subscriptions, no renewals. You keep access to everything in your plan forever, including all new templates added to it every week.",
   },
   {
     question: "What's included in the courses?",
     answer:
-      "Pro subscribers get full access to our video course library covering prompt engineering for UI, advanced Tailwind CSS techniques, building design systems with AI, and framework-specific deep dives. New courses are added monthly.",
+      "Courses are a simple $7 lifetime add-on to any plan: prompt engineering for UI, advanced Tailwind, building design systems with AI, and framework deep dives. New lessons are included as they ship.",
   },
   {
-    question: "Do I get updates?",
+    question: "Do I keep getting new prompts and updates?",
     answer:
-      "Yes. New prompts are added weekly, and all plans include lifetime updates to existing prompts. Pro and Team subscribers also get early access to new features, frameworks, and prompt categories as they launch.",
+      "Yes. New templates land every week and drop straight into your plan at no extra cost. Basic keeps getting every new Figma Kit, Pro every new AI Prompt, Premium everything — forever.",
   },
   {
-    question: "Is there a team plan?",
+    question: "Can I try before I buy?",
     answer:
-      "Yes! Our Team plan includes 5 seats, 500 AI generations per month, API access, custom branding options, and dedicated support. It is designed for agencies and development teams who want to standardize their UI workflow.",
+      "Yes — that's the whole point. Browse the entire catalog free, watch every preview, and use the free templates with no account limits. Buy a plan only when you've seen exactly what you're getting: as digital goods, all sales are final.",
   },
 ] as const;
 

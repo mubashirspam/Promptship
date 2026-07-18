@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import { db } from '@/lib/db';
-import { users, prompts, generations, payments } from '@/lib/db/schema';
+import { derivePlan } from '@/lib/access';
+import { PLANS, type Plan } from '@/lib/utils/constants';
+import { users, prompts, generations, payments, entitlements } from '@/lib/db/schema';
 import { sql, gte, eq, desc } from 'drizzle-orm';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -18,7 +20,8 @@ async function getAnalytics() {
   const sevenDaysAgo = subDays(now, 7);
 
   const [
-    usersByTier,
+    planEntitlements,
+    totalUserCount,
     recentSignups,
     topPrompts,
     dailyGenerations,
@@ -26,11 +29,17 @@ async function getAnalytics() {
   ] = await Promise.all([
     db()
       .select({
-        tier: users.tier,
-        count: sql<number>`count(*)::int`,
+        userId: entitlements.userId,
+        scope: entitlements.scope,
+        scopeId: entitlements.scopeId,
+        expiresAt: entitlements.expiresAt,
+        revokedAt: entitlements.revokedAt,
       })
+      .from(entitlements),
+    db()
+      .select({ count: sql<number>`count(*)::int` })
       .from(users)
-      .groupBy(users.tier),
+      .then((r) => r[0]?.count ?? 0),
     db()
       .select({
         date: sql<string>`to_char(created_at, 'YYYY-MM-DD')`,
@@ -46,7 +55,8 @@ async function getAnalytics() {
         title: prompts.title,
         usageCount: prompts.usageCount,
         copyCount: prompts.copyCount,
-        tier: prompts.tier,
+        isFree: prompts.isFree,
+        assetKind: prompts.assetKind,
       })
       .from(prompts)
       .orderBy(desc(prompts.usageCount))
@@ -73,42 +83,56 @@ async function getAnalytics() {
       .limit(6),
   ]);
 
-  return { usersByTier, recentSignups, topPrompts, dailyGenerations, revenueByMonth };
+  // Derive each user's plan from their entitlement rows
+  const byUser = new Map<string, typeof planEntitlements>();
+  for (const row of planEntitlements) {
+    const list = byUser.get(row.userId) ?? [];
+    list.push(row);
+    byUser.set(row.userId, list);
+  }
+  const planCounts: Record<Plan, number> = { free: 0, basic: 0, pro: 0, premium: 0 };
+  for (const rows of byUser.values()) {
+    planCounts[derivePlan(rows)] += 1;
+  }
+  planCounts.free += Math.max(0, totalUserCount - byUser.size);
+  const usersByPlan = PLANS.map((plan) => ({ plan, count: planCounts[plan] }));
+
+  return { usersByPlan, recentSignups, topPrompts, dailyGenerations, revenueByMonth };
 }
 
-const tierColors: Record<string, string> = {
-  free: 'bg-emerald-500',
-  starter: 'bg-blue-500',
+const planDots: Record<Plan, string> = {
+  free: 'bg-gray-500',
+  basic: 'bg-cyan-500',
   pro: 'bg-purple-500',
-  team: 'bg-amber-500',
+  premium: 'bg-amber-500',
 };
 
 export default async function AdminAnalyticsPage() {
   const data = await getAnalytics();
-  const totalUsers = data.usersByTier.reduce((sum, t) => sum + t.count, 0);
+  const totalUsers = data.usersByPlan.reduce((sum, t) => sum + t.count, 0);
 
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold">Analytics</h1>
 
       <div className="grid gap-4 md:grid-cols-2">
-        {/* Users by Tier */}
+        {/* Users by Plan */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm font-medium">Users by Tier</CardTitle>
+            <CardTitle className="text-sm font-medium">Users by Plan</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            {data.usersByTier.map((t) => (
-              <div key={t.tier} className="flex items-center justify-between">
+            {data.usersByPlan.map((t) => (
+              <div key={t.plan} className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className={`size-3 rounded-full ${tierColors[t.tier] || 'bg-gray-500'}`} />
-                  <span className="text-sm font-medium capitalize">{t.tier}</span>
+                  <div className={`size-3 rounded-full ${planDots[t.plan]}`} />
+                  <span className="text-sm font-medium capitalize">{t.plan}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-muted-foreground">{t.count}</span>
                   <div className="h-2 w-24 overflow-hidden rounded-full bg-muted">
                     <div
-                      className={`h-full rounded-full ${tierColors[t.tier] || 'bg-gray-500'}`}
+                      className={`h-full rounded-full ${planDots[t.plan]}`}
                       style={{ width: `${totalUsers > 0 ? (t.count / totalUsers) * 100 : 0}%` }}
                     />
                   </div>
@@ -205,7 +229,7 @@ export default async function AdminAnalyticsPage() {
                   <tr className="border-b bg-muted/50">
                     <th className="px-4 py-2 text-left font-medium">#</th>
                     <th className="px-4 py-2 text-left font-medium">Title</th>
-                    <th className="px-4 py-2 text-center font-medium">Tier</th>
+                    <th className="px-4 py-2 text-center font-medium">Access</th>
                     <th className="px-4 py-2 text-center font-medium">Uses</th>
                     <th className="px-4 py-2 text-center font-medium">Copies</th>
                   </tr>
@@ -216,7 +240,7 @@ export default async function AdminAnalyticsPage() {
                       <td className="px-4 py-2 text-muted-foreground">{i + 1}</td>
                       <td className="px-4 py-2 font-medium">{p.title}</td>
                       <td className="px-4 py-2 text-center">
-                        <Badge variant="secondary">{p.tier}</Badge>
+                        <Badge variant="secondary">{p.isFree ? 'free' : 'paid'}</Badge>
                       </td>
                       <td className="px-4 py-2 text-center">{p.usageCount}</td>
                       <td className="px-4 py-2 text-center">{p.copyCount}</td>

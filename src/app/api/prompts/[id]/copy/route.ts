@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { prompts, promptCopies, users } from '@/lib/db/schema';
+import { prompts, promptCopies } from '@/lib/db/schema';
 import { eq, sql, and, gte, count } from 'drizzle-orm';
 import { getSession } from '@/lib/auth/session';
-import { TIER_LIMITS, type Tier } from '@/lib/utils/constants';
+import { getEntitlements, hasTemplateAccess, derivePlan, planCopyLimit } from '@/lib/access';
+import { templateProductId } from '@/config/products';
 
 export async function POST(
   _request: Request,
@@ -21,15 +22,45 @@ export async function POST(
     const { id } = await props.params;
     const userId = session.user.id;
 
-    // Get user tier
-    const user = await db()
-      .select({ tier: users.tier })
-      .from(users)
-      .where(eq(users.id, userId))
-      .limit(1)
-      .then(rows => rows[0]);
-    const tier = (user?.tier ?? 'free') as Tier;
-    const limit = TIER_LIMITS[tier].promptCopies;
+    // Entitlements drive both access and the plan-based copy limit
+    const userEntitlements = await getEntitlements(userId);
+    const plan = derivePlan(userEntitlements);
+
+    // Paid templates need a covering entitlement
+    const [template] = await db()
+      .select({
+        id: prompts.id,
+        categoryId: prompts.categoryId,
+        isFree: prompts.isFree,
+        isPublished: prompts.isPublished,
+        assetKind: prompts.assetKind,
+      })
+      .from(prompts)
+      .where(eq(prompts.id, id))
+      .limit(1);
+
+    if (!template || !template.isPublished) {
+      return NextResponse.json(
+        { success: false, error: { code: 'NOT_FOUND', message: 'Prompt not found' } },
+        { status: 404 }
+      );
+    }
+
+    if (!hasTemplateAccess(template, userEntitlements)) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'PURCHASE_REQUIRED',
+            message: 'This template requires a purchase',
+            productId: templateProductId(template.id),
+          },
+        },
+        { status: 403 }
+      );
+    }
+
+    const limit = planCopyLimit(plan);
 
     // Check monthly copy count (unless unlimited)
     if (limit !== Infinity) {

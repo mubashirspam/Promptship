@@ -120,6 +120,12 @@ function AdminSignInForm({
         return;
       }
 
+      // 2FA-enabled accounts get a challenge before a session exists
+      if ((result.data as { twoFactorRedirect?: boolean } | null)?.twoFactorRedirect) {
+        window.location.href = '/verify-2fa';
+        return;
+      }
+
       // Verify admin role
       const user = result.data?.user as { role?: string } | undefined;
       if (user?.role !== 'admin') {

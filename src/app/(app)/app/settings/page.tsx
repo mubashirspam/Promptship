@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/use-auth';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -41,14 +41,24 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { FRAMEWORKS } from '@/lib/utils/constants';
-import { TIER_LABELS, TIER_CREDITS, TIER_COLORS } from '@/lib/utils/constants';
-import type { Tier } from '@/lib/utils/constants';
+import { PLAN_LABELS, PLAN_CREDITS, PLAN_COLORS } from '@/lib/utils/constants';
+import type { Plan } from '@/lib/utils/constants';
 import Link from 'next/link';
 
 export default function SettingsPage() {
   const { user } = useAuth();
-  const tier = ((user as Record<string, unknown>)?.tier as Tier) ?? 'free';
+  // Plan is derived from entitlements server-side — never stored on the user
+  const [plan, setPlan] = useState<Plan>('free');
   const credits = ((user as Record<string, unknown>)?.credits as number) ?? 0;
+
+  useEffect(() => {
+    fetch('/api/user/settings')
+      .then((r) => r.json())
+      .then((json) => {
+        if (json.success && json.data.plan) setPlan(json.data.plan as Plan);
+      })
+      .catch(() => {});
+  }, []);
 
   const [name, setName] = useState(
     ((user as Record<string, unknown>)?.name as string) ?? ''
@@ -240,13 +250,13 @@ export default function SettingsPage() {
                 <div className="flex items-center justify-between rounded-lg border p-4">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <h3 className={cn('font-semibold', TIER_COLORS[tier])}>
-                        {TIER_LABELS[tier]}
+                      <h3 className={cn('font-semibold', PLAN_COLORS[plan])}>
+                        {PLAN_LABELS[plan]}
                       </h3>
                       <Badge variant="secondary">Active</Badge>
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      {credits} / {TIER_CREDITS[tier]} credits remaining
+                      {credits} / {PLAN_CREDITS[plan]} credits remaining
                     </p>
                   </div>
                   <Button variant="outline" asChild>
@@ -264,7 +274,7 @@ export default function SettingsPage() {
                     <div
                       className="h-full rounded-full bg-gradient-to-r from-purple-600 to-violet-600 transition-all"
                       style={{
-                        width: `${Math.min(100, (credits / TIER_CREDITS[tier]) * 100)}%`,
+                        width: `${Math.min(100, (credits / Math.max(1, PLAN_CREDITS[plan])) * 100)}%`,
                       }}
                     />
                   </div>

@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { db } from '@/lib/db';
-import { lessonProgress } from '@/lib/db/schema';
+import { lessonProgress, lessons } from '@/lib/db/schema';
 import { eq, and } from 'drizzle-orm';
 import { getSession } from '@/lib/auth/session';
+import { canAccessCourse } from '@/lib/access';
 
 export async function GET() {
   try {
@@ -46,6 +47,35 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { success: false, error: { code: 'BAD_REQUEST', message: 'lessonId is required' } },
         { status: 400 }
+      );
+    }
+
+    // Progress can only be written for lessons the user can actually watch
+    const [lesson] = await db()
+      .select({ moduleId: lessons.moduleId, isFreePreview: lessons.isFreePreview })
+      .from(lessons)
+      .where(eq(lessons.id, lessonId))
+      .limit(1);
+    if (!lesson) {
+      return NextResponse.json(
+        { success: false, error: { code: 'NOT_FOUND', message: 'Lesson not found' } },
+        { status: 404 }
+      );
+    }
+    if (
+      !lesson.isFreePreview &&
+      !(await canAccessCourse(session.user.id, lesson.moduleId))
+    ) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'PURCHASE_REQUIRED',
+            message: 'This course requires a purchase',
+            productId: `course:${lesson.moduleId}`,
+          },
+        },
+        { status: 403 }
       );
     }
 

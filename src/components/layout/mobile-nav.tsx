@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Menu, LogOut, Lock } from 'lucide-react';
+import { Menu, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Logo } from '@/components/shared/logo';
 import { Button } from '@/components/ui/button';
@@ -17,12 +17,7 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import { appNavigation, settingsItem } from '@/config/navigation';
-import {
-  hasTierAccess,
-  TIER_LABELS,
-  TIER_CREDITS,
-  type Tier,
-} from '@/lib/utils/constants';
+import { PLAN_LABELS } from '@/lib/utils/constants';
 import { useAuth } from '@/hooks/use-auth';
 import { useCredits } from '@/hooks/use-credits';
 import { authClient } from '@/lib/auth/client';
@@ -35,7 +30,7 @@ export function MobileNav({ className }: MobileNavProps) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   const { user } = useAuth();
-  const { credits } = useCredits();
+  const { credits, plan, total: totalCredits } = useCredits();
 
   const userName =
     ((user as Record<string, unknown>)?.name as string) ?? 'User';
@@ -44,9 +39,6 @@ export function MobileNav({ className }: MobileNavProps) {
   const userImage = (user as Record<string, unknown>)?.image as
     | string
     | undefined;
-  const userTier =
-    ((user as Record<string, unknown>)?.tier as Tier) ?? 'free';
-  const totalCredits = TIER_CREDITS[userTier];
 
   const isActive = (href: string) =>
     pathname === href ||
@@ -86,7 +78,7 @@ export function MobileNav({ className }: MobileNavProps) {
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-semibold">{userName}</p>
               <p className="text-xs text-green-500">
-                {TIER_LABELS[userTier]}
+                {PLAN_LABELS[plan]}
               </p>
             </div>
           </div>
@@ -99,30 +91,32 @@ export function MobileNav({ className }: MobileNavProps) {
           <ul className="flex flex-col gap-0.5">
             {appNavigation.map((item) => {
               const active = isActive(item.href);
-              const hasAccess = hasTierAccess(userTier, item.tier);
-              const href = hasAccess ? item.href : '/upgrade';
 
               return (
                 <li key={item.href}>
                   <Link
-                    href={href}
+                    href={item.href}
                     onClick={() => setOpen(false)}
                     className={cn(
                       'flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors',
                       active
                         ? 'bg-primary text-primary-foreground'
-                        : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground',
-                      !hasAccess && 'opacity-50'
+                        : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
                     )}
                   >
                     <item.icon className="size-5" />
                     <span>{item.title}</span>
-                    {item.badge && hasAccess && (
-                      <span className="ml-auto rounded-full bg-primary/20 px-2 py-0.5 text-xs text-primary">
-                        {item.badge}
+                    {item.comingSoon ? (
+                      <span className="ml-auto rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+                        Soon
                       </span>
+                    ) : (
+                      item.badge && (
+                        <span className="ml-auto rounded-full bg-primary/20 px-2 py-0.5 text-xs text-primary">
+                          {item.badge}
+                        </span>
+                      )
                     )}
-                    {!hasAccess && <Lock className="ml-auto size-4" />}
                   </Link>
                 </li>
               );

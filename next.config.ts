@@ -2,15 +2,24 @@ import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
+  // Dev runs on lvh.me subdomains (app.lvh.me:3000 etc.) — allow them to load
+  // /_next dev resources cross-origin
+  allowedDevOrigins: ['lvh.me', '*.lvh.me'],
   images: {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: '**.vercel-storage.com',
+        hostname: 'avatars.githubusercontent.com',
       },
+      // Google OAuth profile photos (lh3/lh4/… subdomains)
       {
         protocol: 'https',
-        hostname: 'avatars.githubusercontent.com',
+        hostname: '**.googleusercontent.com',
+      },
+      // R2 public buckets (until a custom cdn domain is connected)
+      {
+        protocol: 'https',
+        hostname: '**.r2.dev',
       },
     ],
   },

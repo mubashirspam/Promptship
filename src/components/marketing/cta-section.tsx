@@ -34,8 +34,8 @@ export function CTASection() {
               Ready to Ship Faster?
             </h2>
             <p className="mx-auto mt-4 max-w-xl text-lg text-white/80">
-              Join thousands of developers building beautiful UIs with AI.
-              Start free - no credit card required.
+              Browse 400+ Figma Kits, AI Prompts and Code Starters free.
+              Pay once when you're ready — own it forever.
             </p>
             <div className="mt-8">
               <Button
@@ -44,7 +44,7 @@ export function CTASection() {
                 className="min-w-[200px] bg-white text-foreground hover:bg-white/90"
               >
                 <a href={`${siteConfig.appUrl}/signup`}>
-                  Get Started Free
+                  Start Browsing Free
                   <ArrowRight className="ml-2 size-4" />
                 </a>
               </Button>

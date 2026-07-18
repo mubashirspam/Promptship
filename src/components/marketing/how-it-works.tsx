@@ -1,36 +1,36 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 import { Search, Copy, Code, Rocket } from "lucide-react";
 
 const steps = [
   {
     icon: Search,
-    title: "Browse Prompts",
+    title: "Browse Templates",
     description:
-      "Explore our library of 100+ curated prompts organized by category and framework.",
+      "Explore 400+ Figma Kits, AI Prompts and Code Starters — filter by category, platform and framework.",
     color: "bg-blue-500/10 text-blue-500",
   },
   {
     icon: Copy,
-    title: "Copy & Customize",
+    title: "Unlock Once",
     description:
-      "Copy any prompt with one click. Customize style, animation level, and dark mode.",
+      "Free templates are yours instantly. Unlock everything with a one-time plan — Basic, Pro or Premium. No subscriptions.",
     color: "bg-purple-500/10 text-purple-500",
   },
   {
     icon: Code,
-    title: "Generate Code",
+    title: "Grab the Assets",
     description:
-      "Paste into any AI tool or use our built-in generator to get production-ready code.",
+      "Open the Figma file, copy the prompt, or download the source zip — and ship your site or app the same day.",
     color: "bg-cyan-500/10 text-cyan-500",
   },
   {
     icon: Rocket,
     title: "Ship It",
     description:
-      "Drop the generated component into your project. Clean code, ready for production.",
+      "Production-ready designs, prompts and code — drop them straight into your project and launch.",
     color: "bg-emerald-500/10 text-emerald-500",
   },
 ] as const;

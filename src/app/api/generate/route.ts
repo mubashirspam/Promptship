@@ -6,7 +6,8 @@ import { db } from '@/lib/db';
 import { generations, users } from '@/lib/db/schema';
 import { eq, sql } from 'drizzle-orm';
 import { getSession } from '@/lib/auth/session';
-import { hasTierAccess, type Tier } from '@/lib/utils/constants';
+import { canUseFeature } from '@/lib/access';
+import { checkRateLimit } from '@/lib/rate-limit';
 
 export async function POST(request: NextRequest) {
   try {
@@ -20,24 +21,36 @@ export async function POST(request: NextRequest) {
 
     const userId = session.user.id;
 
-    // Check tier access (pro+ only)
+    // AI generation is an entitlement (all-access or the ai_generate add-on)
+    if (!(await canUseFeature(userId, 'ai_generate'))) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'PURCHASE_REQUIRED',
+            message: 'The AI Generator is an add-on — get All Access or the AI add-on to use it.',
+            productId: 'ai-generate-monthly',
+          },
+        },
+        { status: 403 }
+      );
+    }
+
+    // Abuse guard on top of credits (10 generations/min per user)
+    const rate = await checkRateLimit('generate', userId, { limit: 10, windowSec: 60 });
+    if (!rate.success) {
+      return NextResponse.json(
+        { success: false, error: { code: 'RATE_LIMITED', message: 'Too many generations — try again in a minute.' } },
+        { status: 429 }
+      );
+    }
+
     const user = await db()
-      .select({
-        tier: users.tier,
-        credits: users.credits,
-      })
+      .select({ credits: users.credits })
       .from(users)
       .where(eq(users.id, userId))
       .limit(1)
       .then(rows => rows[0]);
-
-    const tier = (user?.tier ?? 'free') as Tier;
-    if (!hasTierAccess(tier, 'pro')) {
-      return NextResponse.json(
-        { success: false, error: { code: 'TIER_REQUIRED', message: 'AI Generator requires Pro tier or higher.' } },
-        { status: 403 }
-      );
-    }
 
     // Check credits
     if ((user?.credits ?? 0) < 1) {

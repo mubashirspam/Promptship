@@ -4,6 +4,7 @@ import { db } from '@/lib/db';
 import { users } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { getSession } from '@/lib/auth/session';
+import { getUserPlan } from '@/lib/access';
 
 export async function GET() {
   try {
@@ -21,7 +22,6 @@ export async function GET() {
         name: users.name,
         email: users.email,
         avatarUrl: users.avatarUrl,
-        tier: users.tier,
         credits: users.credits,
         defaultFramework: users.defaultFramework,
         preferredCurrency: users.preferredCurrency,
@@ -40,7 +40,8 @@ export async function GET() {
       );
     }
 
-    return NextResponse.json({ success: true, data: user });
+    const plan = await getUserPlan(user.id);
+    return NextResponse.json({ success: true, data: { ...user, plan } });
   } catch (error) {
     console.error('Settings fetch error:', error);
     return NextResponse.json(
