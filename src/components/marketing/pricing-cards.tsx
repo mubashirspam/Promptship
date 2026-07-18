@@ -1,249 +1,242 @@
 "use client";
 
-import { cn } from "@/lib/utils";
 import { useUIStore } from "@/stores/ui-store";
 import { siteConfig } from "@/config/site";
 import { pricingPlans, type PlanKey } from "@/config/pricing";
 import { useProductPrices } from "@/hooks/use-product-prices";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Check, Crown, Figma, Sparkles } from "lucide-react";
+import { Check, Sparkles, Zap, Crown, ArrowRight } from "lucide-react";
 
-const planIcons: Record<string, React.ReactNode> = {
-  basic: <Figma className="size-5" />,
-  pro: <Sparkles className="size-5" />,
-  premium: <Crown className="size-5" />,
+type Currency = "USD" | "INR";
+
+const planIcons: Record<PlanKey, React.ElementType> = {
+  basic: Zap,
+  pro: Sparkles,
+  premium: Crown,
 };
 
-function formatPrice(
-  price: number | { monthly: number; yearly?: number },
-  currency: "USD" | "INR",
-  isOneTime: boolean
-) {
-  const symbol = currency === "USD" ? "$" : "\u20B9";
-  if (typeof price === "number") {
-    return {
-      display: `${symbol}${price}`,
-      period: isOneTime ? "one-time" : "/mo",
-    };
-  }
-  return {
-    display: `${symbol}${price.monthly}`,
-    period: "/mo",
-    yearly: price.yearly ? `${symbol}${price.yearly}/yr` : undefined,
-  };
+function formatPrice(amount: number, curr: Currency) {
+  return new Intl.NumberFormat(curr === "USD" ? "en-US" : "en-IN", {
+    style: "currency",
+    currency: curr,
+    maximumFractionDigits: 0,
+  }).format(amount);
 }
 
 export function PricingCards() {
   const { currency, setCurrency } = useUIStore();
   const livePrices = useProductPrices();
 
+  // Admin-managed DB price wins; static config is the fallback
+  const priceOf = (k: PlanKey) => {
+    const cfg = pricingPlans[k];
+    const live = livePrices[cfg.productId];
+    if (live) return currency === "USD" ? live.usd : live.inr;
+    return currency === "USD" ? cfg.priceUSD : cfg.priceINR;
+  };
+  const anchorOf = (k: PlanKey) => {
+    const cfg = pricingPlans[k];
+    return currency === "USD" ? cfg.anchorUSD : cfg.anchorINR;
+  };
+
   const planEntries = Object.entries(pricingPlans) as [
     PlanKey,
     (typeof pricingPlans)[PlanKey],
   ][];
+  const proDelta = priceOf("premium") - priceOf("pro");
 
   return (
-    <section className="px-4 py-20 sm:py-28">
-      <div className="mx-auto max-w-6xl">
-        <div className="mb-12 text-center">
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-            <span className="gradient-text">400+ templates.</span> One price.
-            <br className="hidden sm:block" /> Every framework.
+    <section className="relative overflow-hidden bg-[#0a0a0a] px-4 pb-24 pt-20 font-sans text-slate-200 selection:bg-purple-500/30 sm:px-6 lg:px-8">
+      {/* Background effects */}
+      <div className="pointer-events-none absolute inset-0 z-0">
+        <div className="absolute top-[-10%] left-[-10%] h-[40%] w-[40%] rounded-full bg-pink-500/10 mix-blend-screen blur-[120px]" />
+        <div className="absolute top-[20%] right-[-10%] h-[50%] w-[50%] rounded-full bg-purple-600/10 mix-blend-screen blur-[150px]" />
+        <div className="absolute bottom-[-10%] left-[20%] h-[60%] w-[60%] rounded-full bg-indigo-500/10 mix-blend-screen blur-[150px]" />
+        {/* Subtle grid pattern for depth */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:24px_24px]" />
+      </div>
+
+      <div className="relative z-10 mx-auto max-w-7xl">
+        {/* Header */}
+        <div className="mx-auto mb-20 max-w-3xl text-center">
+          <h2 className="mb-6 text-4xl font-extrabold tracking-tight text-white drop-shadow-sm md:text-5xl lg:text-6xl">
+            400+ templates. One price.
+            <br />
+            <span className="bg-gradient-to-r from-pink-400 via-purple-400 to-indigo-400 bg-clip-text text-transparent">
+              Every framework.
+            </span>
           </h2>
-          <p className="mx-auto mt-4 max-w-xl text-muted-foreground">
+          <p className="mx-auto mb-10 max-w-2xl text-lg font-medium text-slate-400">
             Pay once, own it forever. No subscriptions, no renewals, no hidden
-            fees.
+            fees. Ship your next project faster than ever.
           </p>
 
           {/* Currency toggle */}
-          <div className="mt-6 inline-flex items-center gap-2 rounded-lg border bg-muted/50 p-1">
-            <button
-              onClick={() => setCurrency("USD")}
-              className={cn(
-                "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
-                currency === "USD"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              USD ($)
-            </button>
-            <button
-              onClick={() => setCurrency("INR")}
-              className={cn(
-                "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
-                currency === "INR"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              INR ({"\u20B9"})
-            </button>
+          <div className="inline-flex items-center rounded-full border border-white/10 bg-black/40 p-1.5 shadow-2xl backdrop-blur-xl">
+            {(["USD", "INR"] as Currency[]).map((curr) => (
+              <button
+                key={curr}
+                onClick={() => setCurrency(curr)}
+                className={`relative rounded-full px-6 py-2.5 text-sm font-bold transition-all duration-300 ease-out ${
+                  currency === curr
+                    ? "text-white shadow-lg"
+                    : "text-slate-400 hover:bg-white/5 hover:text-slate-200"
+                }`}
+              >
+                {currency === curr && (
+                  <span
+                    className="absolute inset-0 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 opacity-100 transition-opacity duration-300"
+                    style={{ zIndex: -1 }}
+                  />
+                )}
+                {curr === "USD" ? "USD ($)" : "INR (₹)"}
+              </button>
+            ))}
           </div>
         </div>
 
-        <div className="grid items-stretch gap-6 md:grid-cols-3">
+        {/* Cards — 1 col mobile, 3 cols md+ */}
+        <div className="mx-auto grid max-w-7xl grid-cols-1 items-stretch gap-6 px-2 sm:px-0 md:grid-cols-3 lg:gap-8">
           {planEntries.map(([key, plan]) => {
-            const isPopular = "popular" in plan && plan.popular;
-            const isBestValue = "bestValue" in plan && plan.bestValue;
-            // Admin-managed DB price wins; static config is the fallback
-            const priceOf = (k: PlanKey) => {
-              const cfg = pricingPlans[k];
-              const l = livePrices[cfg.productId];
-              if (l) return currency === "USD" ? l.usd : l.inr;
-              return currency === "USD" ? cfg.priceUSD : cfg.priceINR;
-            };
-            const rawPrice = priceOf(key);
-            const priceInfo = formatPrice(rawPrice, currency, plan.isOneTime);
-            const symbol = currency === "USD" ? "$" : "\u20B9";
-            const proDelta = priceOf("premium") - priceOf("pro");
-            const anchor =
-              currency === "USD"
-                ? "anchorUSD" in plan
-                  ? plan.anchorUSD
-                  : undefined
-                : "anchorINR" in plan
-                  ? plan.anchorINR
-                  : undefined;
-            const savePct =
-              anchor && typeof rawPrice === "number" && anchor > rawPrice
-                ? Math.round((1 - rawPrice / anchor) * 100)
+            const Icon = planIcons[key];
+            const highlighted = "bestValue" in plan && plan.bestValue;
+            const badge = highlighted
+              ? "Best Value"
+              : "popular" in plan && plan.popular
+                ? "Popular"
                 : null;
-            const ctaLabel =
-              "ctaLabel" in plan ? plan.ctaLabel : "Get Started";
+            const price = priceOf(key);
+            const anchor = anchorOf(key);
+            const savePct =
+              anchor && anchor > price
+                ? Math.round((1 - price / anchor) * 100)
+                : null;
+            const features = highlighted
+              ? [
+                  `The entire library — only ${formatPrice(proDelta, currency)} more than Pro`,
+                  ...plan.features,
+                ]
+              : [...plan.features];
 
             return (
-              <Card
+              <div
                 key={key}
-                className={cn(
-                  "relative flex flex-col transition-all duration-300",
-                  isPopular && "ring-1 ring-purple-500/40",
-                  isBestValue &&
-                    "z-10 bg-gradient-to-b from-amber-500/[0.06] to-transparent ring-2 ring-amber-500/60 shadow-xl shadow-amber-500/15 md:scale-[1.05]"
-                )}
+                className={`relative mt-4 flex flex-col rounded-3xl border p-6 backdrop-blur-xl transition-all duration-500 md:mt-0 lg:p-8 ${
+                  highlighted
+                    ? "z-10 border-purple-500/40 bg-gradient-to-b from-purple-900/40 to-black/60 shadow-[0_0_50px_-12px_rgba(168,85,247,0.4)] md:-translate-y-4"
+                    : "border-white/10 bg-white/[0.03] hover:border-white/20 hover:bg-white/[0.05]"
+                }`}
               >
-                {isPopular && (
-                  <Badge
-                    variant="secondary"
-                    className="absolute -top-2.5 left-1/2 -translate-x-1/2 border border-purple-500/30 bg-background text-purple-500"
-                  >
-                    Popular
-                  </Badge>
-                )}
-                {isBestValue && (
-                  <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 gap-1 border-0 bg-gradient-to-r from-amber-500 to-orange-500 px-3 py-1 text-white shadow-md">
-                    <Crown className="size-3" />
-                    Best Value
-                  </Badge>
+                {/* Highlighted glow line */}
+                {highlighted && (
+                  <div className="absolute -top-[1px] left-8 right-8 h-[1px] bg-gradient-to-r from-transparent via-purple-400 to-transparent opacity-70" />
                 )}
 
-                <CardHeader>
-                  <div
-                    className={cn(
-                      "mb-1 flex size-9 items-center justify-center rounded-lg",
-                      isBestValue
-                        ? "bg-gradient-to-br from-amber-500 to-orange-500 text-white"
-                        : "bg-primary/10 text-primary"
-                    )}
-                  >
-                    {planIcons[key]}
-                  </div>
-                  <CardTitle className="text-xl">{plan.name}</CardTitle>
-                  <CardDescription>{plan.description}</CardDescription>
-                </CardHeader>
-
-                <CardContent className="flex flex-1 flex-col">
-                  <div className="mb-6">
-                    <div className="flex items-baseline gap-2">
-                      <span
-                        className={cn(
-                          "text-4xl font-bold tracking-tight",
-                          isBestValue &&
-                            "bg-gradient-to-r from-amber-500 to-orange-500 bg-clip-text text-transparent"
-                        )}
-                      >
-                        {priceInfo.display}
-                      </span>
-                      <span className="text-sm text-muted-foreground">
-                        {priceInfo.period}
-                      </span>
-                      {anchor && (
-                        <span className="text-base font-medium text-muted-foreground/60 line-through">
-                          {symbol}
-                          {anchor}
-                        </span>
-                      )}
-                    </div>
-                    {savePct && (
-                      <Badge className="mt-2 border-0 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-                        Save {savePct}%
-                      </Badge>
-                    )}
-                    {isBestValue && proDelta > 0 && (
-                      <p className="mt-1.5 text-sm font-medium text-amber-600 dark:text-amber-400">
-                        The entire library — only {symbol}
-                        {proDelta} more than Pro
-                      </p>
-                    )}
-                  </div>
-
-                  <ul className="flex-1 space-y-3">
-                    {plan.features.map((feature) => (
-                      <li key={feature} className="flex items-start gap-2">
-                        <Check
-                          className={cn(
-                            "mt-0.5 size-4 shrink-0",
-                            isBestValue ? "text-amber-500" : "text-green-500"
-                          )}
-                        />
-                        <span className="text-sm text-muted-foreground">
-                          {feature}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-
-                <CardFooter>
-                  <Button
-                    asChild
-                    variant={isBestValue || isPopular ? "default" : "outline"}
-                    size="lg"
-                    className={cn(
-                      "w-full",
-                      isBestValue &&
-                        "bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-500/25 hover:from-amber-600 hover:to-orange-600"
-                    )}
-                  >
-                    <a
-                      href={
-                        'productId' in plan && plan.productId
-                          ? `${siteConfig.appUrl}/upgrade?product=${plan.productId}`
-                          : `${siteConfig.appUrl}/signup`
-                      }
+                {/* Top badges: Popular/Best Value + Save % */}
+                <div className="absolute -top-4 left-0 right-0 z-20 flex justify-center gap-2 px-2">
+                  {badge && (
+                    <span
+                      className={`whitespace-nowrap rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-wider shadow-lg lg:text-xs ${
+                        highlighted
+                          ? "border border-purple-400/30 bg-gradient-to-r from-pink-500 to-purple-600 text-white"
+                          : "border border-slate-600 bg-slate-800 text-slate-300"
+                      }`}
                     >
-                      {ctaLabel}
-                    </a>
-                  </Button>
-                </CardFooter>
-              </Card>
+                      {badge}
+                    </span>
+                  )}
+                  {savePct && (
+                    <span className="whitespace-nowrap rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-emerald-400 shadow-lg backdrop-blur-md lg:text-xs">
+                      Save {savePct}%
+                    </span>
+                  )}
+                </div>
+
+                {/* Card header */}
+                <div className="mb-6 mt-4">
+                  <div className="mb-3 flex items-center gap-3">
+                    <div
+                      className={`rounded-xl p-2 ${
+                        highlighted
+                          ? "bg-purple-500/20 text-purple-300"
+                          : "bg-white/5 text-slate-300"
+                      }`}
+                    >
+                      <Icon size={22} />
+                    </div>
+                    <h3 className="text-xl font-bold tracking-wide text-white">
+                      {plan.name}
+                    </h3>
+                  </div>
+                  <p className="h-10 text-sm leading-relaxed text-slate-400">
+                    {plan.description}
+                  </p>
+                </div>
+
+                {/* Price */}
+                <div className="mb-8 border-b border-white/5 pb-8">
+                  <div className="mb-2 flex flex-wrap items-end gap-x-2 gap-y-1">
+                    <span className="text-4xl font-extrabold tracking-tighter text-white lg:text-5xl">
+                      {formatPrice(price, currency)}
+                    </span>
+                    {anchor && (
+                      <div className="flex flex-col pb-1.5">
+                        <span className="text-xs font-medium text-slate-400 lg:text-sm">
+                          instead of{" "}
+                          <span className="ml-1 font-bold text-slate-300 line-through decoration-pink-500/60 decoration-2">
+                            {formatPrice(anchor, currency)}
+                          </span>
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  <p className="text-sm font-medium text-slate-400">one-time</p>
+                </div>
+
+                {/* Features */}
+                <div className="mb-8 flex-1 space-y-4">
+                  {features.map((feature, idx) => (
+                    <div key={idx} className="flex items-start gap-3">
+                      <div
+                        className={`mt-0.5 shrink-0 rounded-full p-0.5 ${
+                          highlighted
+                            ? "bg-purple-500/20 text-purple-400"
+                            : "bg-white/5 text-slate-400"
+                        }`}
+                      >
+                        <Check size={14} strokeWidth={3} />
+                      </div>
+                      <span
+                        className={`text-sm leading-snug ${
+                          highlighted && idx === 0
+                            ? "font-semibold text-white"
+                            : "text-slate-300"
+                        }`}
+                      >
+                        {feature}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* CTA */}
+                <a
+                  href={`${siteConfig.appUrl}/upgrade?product=${plan.productId}`}
+                  className={`group mt-auto flex w-full items-center justify-center gap-2 rounded-2xl px-6 py-4 text-sm font-bold transition-all duration-300 ${
+                    highlighted
+                      ? "bg-gradient-to-r from-pink-500 to-purple-600 text-white shadow-lg shadow-purple-500/25 hover:-translate-y-1 hover:shadow-purple-500/40"
+                      : "border border-white/10 bg-white/5 text-white hover:border-white/20 hover:bg-white/10"
+                  }`}
+                >
+                  {plan.ctaLabel}
+                  <ArrowRight
+                    size={16}
+                    className="transition-transform group-hover:translate-x-1.5"
+                  />
+                </a>
+              </div>
             );
           })}
         </div>
-
-        <p className="mx-auto mt-10 max-w-2xl text-center text-sm text-muted-foreground">
-          400+ templates today, new ones added every week. One payment —
-          every framework, every update.
-        </p>
       </div>
     </section>
   );
