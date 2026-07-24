@@ -5,6 +5,7 @@ import { eq, sql } from 'drizzle-orm';
 import { getSession } from '@/lib/auth/session';
 import { canAccessTemplate } from '@/lib/access';
 import { templateProductId } from '@/config/products';
+import { isR2Key, presignR2Download } from '@/lib/r2';
 
 /**
  * Entitlement-gated template download. The ONLY way paid assets are handed
@@ -62,6 +63,17 @@ export async function GET(
       );
     }
 
+    // Entitlement is confirmed — mint a short-lived link to the private object.
+    // `assetUrl` holds an R2 key; legacy rows hold a full public URL, which is
+    // passed through unchanged so old templates keep downloading.
+    let assetUrl = template.assetUrl;
+    if (assetUrl && isR2Key(assetUrl)) {
+      const filename = `${template.title ?? 'template'}.${assetUrl.split('.').pop() ?? 'zip'}`
+        .toLowerCase()
+        .replace(/[^a-z0-9._-]+/g, '-');
+      assetUrl = await presignR2Download(assetUrl, filename);
+    }
+
     await Promise.all([
       db().insert(templateDownloads).values({ userId: session.user.id, promptId: template.id }),
       db()
@@ -74,8 +86,8 @@ export async function GET(
       success: true,
       data: {
         title: template.title,
-        // File asset (zip / .fig / pack) when one is uploaded…
-        assetUrl: template.assetUrl,
+        // Presigned, expires in 5 minutes — do not cache or persist client-side.
+        assetUrl,
         // …and the prompt content itself for ai_prompt templates
         promptText: template.promptText,
         detailedPrompt: template.detailedPrompt,

@@ -6,7 +6,11 @@ export type UploadKind = 'image' | 'video' | 'asset';
  * Direct browser→R2 upload (admin only). Files never touch our server
  * (avoids Vercel's 4.5 MB body limit) — the server only issues a presigned
  * URL after verifying admin + file type/size, then the browser PUTs straight
- * to the zero-egress Cloudflare CDN bucket. Returns the public CDN URL.
+ * to R2.
+ *
+ * Returns a value to store in the DB, which differs by kind:
+ *   'image' | 'video' → public CDN URL (previews are meant to be public)
+ *   'asset'           → private-bucket KEY, presigned at download time
  */
 export async function uploadAdminFile(
   file: File,
@@ -42,5 +46,6 @@ export async function uploadAdminFile(
     xhr.onerror = () => reject(new Error('Upload failed — check the R2 bucket CORS settings'));
     xhr.send(file);
   });
-  return json.data.publicUrl as string;
+  // Private assets have no public URL — store the key instead.
+  return (json.data.publicUrl ?? json.data.key) as string;
 }

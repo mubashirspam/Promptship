@@ -1,11 +1,3 @@
-import { cn } from "@/lib/utils";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
 import { Figma, Sparkles, Code, GraduationCap } from "lucide-react";
 
 const features = [
@@ -40,11 +32,13 @@ export function FeaturesGrid() {
     <section className="px-4 py-20 sm:py-28">
       <div className="mx-auto max-w-6xl">
         <div className="mb-12 text-center">
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+          <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
             Everything you need to{" "}
-            <span className="gradient-text">build faster</span>
+            <span className="bg-gradient-to-r from-pink-400 via-purple-400 to-indigo-400 bg-clip-text text-transparent">
+              build faster
+            </span>
           </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
+          <p className="mx-auto mt-4 max-w-2xl text-slate-400">
             Promtify gives you the tools, prompts, and knowledge to ship
             beautiful user interfaces at record speed.
           </p>
@@ -52,25 +46,18 @@ export function FeaturesGrid() {
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           {features.map((feature) => (
-            <Card
+            <div
               key={feature.title}
-              className={cn(
-                "transition-all duration-300",
-                "hover:-translate-y-1 hover:shadow-lg hover:ring-foreground/20"
-              )}
+              className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-white/20 hover:bg-white/[0.05]"
             >
-              <CardHeader>
-                <div className="mb-2 flex size-10 items-center justify-center rounded-lg bg-primary/10">
-                  <feature.icon className="size-5 text-primary" />
-                </div>
-                <CardTitle>{feature.title}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CardDescription className="text-sm leading-relaxed">
-                  {feature.description}
-                </CardDescription>
-              </CardContent>
-            </Card>
+              <div className="mb-4 flex size-10 items-center justify-center rounded-lg bg-purple-500/15 text-purple-300">
+                <feature.icon className="size-5" />
+              </div>
+              <h3 className="font-semibold text-white">{feature.title}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-slate-400">
+                {feature.description}
+              </p>
+            </div>
           ))}
         </div>
       </div>

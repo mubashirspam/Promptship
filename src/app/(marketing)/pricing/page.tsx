@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { PricingCards } from '@/components/marketing/pricing-cards';
 import { FAQAccordion } from '@/components/marketing/faq-accordion';
+import { DarkBackdrop } from '@/components/marketing/dark-backdrop';
 
 export const metadata: Metadata = {
   title: 'Pricing',
@@ -9,14 +10,10 @@ export const metadata: Metadata = {
 };
 
 export default function PricingPage() {
-  // PricingCards renders its own full-bleed dark section with heading —
-  // the page adds nothing above it so home and /pricing look identical
   return (
-    <div>
+    <DarkBackdrop>
       <PricingCards />
-      <div className="py-20">
-        <FAQAccordion />
-      </div>
-    </div>
+      <FAQAccordion />
+    </DarkBackdrop>
   );
 }

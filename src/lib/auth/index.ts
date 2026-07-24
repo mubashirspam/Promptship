@@ -3,6 +3,7 @@ import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { admin, twoFactor } from 'better-auth/plugins';
 import { neon } from '@neondatabase/serverless';
 import { drizzle } from 'drizzle-orm/neon-http';
+import { resolveDatabaseUrl } from '@/lib/db';
 import {
   users,
   sessions,
@@ -17,8 +18,10 @@ const protocol = rootDomain.includes(':') ? 'http' : 'https';
 // Leading dot shares the session cookie across app./admin. in every environment
 const cookieDomain = '.' + rootDomain.split(':')[0];
 
-// Dedicated db instance for auth to avoid lazy-init issues
-const sql = neon(process.env.DATABASE_URL!);
+// Dedicated db instance for auth to avoid lazy-init issues.
+// Uses the same per-environment resolver as the main db so auth data
+// (users/sessions) always lives in the same database as everything else.
+const sql = neon(resolveDatabaseUrl()!);
 const authDb = drizzle(sql);
 
 export const auth = betterAuth({

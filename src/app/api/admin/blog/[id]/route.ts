@@ -46,15 +46,32 @@ export async function PUT(
     const { id } = await params;
     const body = await request.json();
 
-    // If publishing for first time, set publishedAt
-    if (body.status === 'published' && !body.publishedAt) {
-      body.publishedAt = new Date();
+    // Whitelist editable fields — never spread the raw body
+    const editable = [
+      'title', 'slug', 'excerpt', 'content', 'coverImageUrl',
+      'status', 'category', 'tags',
+    ] as const;
+    const updates: Record<string, unknown> = {};
+    for (const key of editable) {
+      if (body[key] !== undefined) updates[key] = body[key];
+    }
+
+    // Set publishedAt only on the FIRST publish — never reset it on edits
+    if (updates.status === 'published') {
+      const [current] = await db()
+        .select({ publishedAt: blogPosts.publishedAt })
+        .from(blogPosts)
+        .where(eq(blogPosts.id, id))
+        .limit(1);
+      if (current && !current.publishedAt) {
+        updates.publishedAt = new Date();
+      }
     }
 
     const result = await db()
       .update(blogPosts)
       .set({
-        ...body,
+        ...updates,
         updatedAt: new Date(),
       })
       .where(eq(blogPosts.id, id))
