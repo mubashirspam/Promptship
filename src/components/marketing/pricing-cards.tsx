@@ -45,16 +45,7 @@ export function PricingCards() {
   const proDelta = priceOf("premium") - priceOf("pro");
 
   return (
-    <section className="relative overflow-hidden bg-[#0a0a0a] px-4 pb-24 pt-20 font-sans text-slate-200 selection:bg-purple-500/30 sm:px-6 lg:px-8">
-      {/* Background effects */}
-      <div className="pointer-events-none absolute inset-0 z-0">
-        <div className="absolute top-[-10%] left-[-10%] h-[40%] w-[40%] rounded-full bg-pink-500/10 mix-blend-screen blur-[120px]" />
-        <div className="absolute top-[20%] right-[-10%] h-[50%] w-[50%] rounded-full bg-purple-600/10 mix-blend-screen blur-[150px]" />
-        <div className="absolute bottom-[-10%] left-[20%] h-[60%] w-[60%] rounded-full bg-indigo-500/10 mix-blend-screen blur-[150px]" />
-        {/* Subtle grid pattern for depth */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:24px_24px]" />
-      </div>
-
+    <section className="px-4 pb-24 pt-20 sm:px-6 lg:px-8">
       <div className="relative z-10 mx-auto max-w-7xl">
         {/* Header */}
         <div className="mx-auto mb-20 max-w-3xl text-center">

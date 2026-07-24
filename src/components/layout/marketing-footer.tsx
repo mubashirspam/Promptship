@@ -28,15 +28,17 @@ const socialLinks = [
   { title: 'LinkedIn', href: siteConfig.links.linkedin },
 ];
 
+// Dark footer regardless of the site's light/dark theme toggle — matches
+// the permanently-dark header/hero so the page never ends on a light seam.
 export function MarketingFooter() {
   return (
-    <footer className="border-t bg-muted/30">
+    <footer className="border-t border-white/10 bg-[#0a0a0a]">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-5">
           {/* Brand column */}
           <div className="lg:col-span-2">
             <Logo />
-            <p className="mt-3 max-w-xs text-sm text-muted-foreground">
+            <p className="mt-3 max-w-xs text-sm text-slate-400">
               Premium Figma Kits, AI Prompts and Code Starters. Pay once, own
               it forever.
             </p>
@@ -47,7 +49,7 @@ export function MarketingFooter() {
                   href={link.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                  className="text-sm text-slate-400 transition-colors hover:text-white"
                 >
                   {link.title}
                 </a>
@@ -58,13 +60,15 @@ export function MarketingFooter() {
           {/* Link columns */}
           {Object.entries(footerLinks).map(([category, links]) => (
             <div key={category}>
-              <h3 className="mb-3 text-sm font-semibold">{category}</h3>
+              <h3 className="mb-3 text-sm font-semibold text-white">
+                {category}
+              </h3>
               <ul className="flex flex-col gap-2">
                 {links.map((link) => (
                   <li key={link.href}>
                     <Link
                       href={link.href}
-                      className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                      className="text-sm text-slate-400 transition-colors hover:text-white"
                     >
                       {link.title}
                     </Link>
@@ -75,10 +79,10 @@ export function MarketingFooter() {
           ))}
         </div>
 
-        <Separator className="my-8" />
+        <Separator className="my-8 bg-white/10" />
 
         <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-slate-500">
             &copy; {new Date().getFullYear()} Promtify. All rights reserved.
           </p>
         </div>

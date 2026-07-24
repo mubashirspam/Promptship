@@ -41,7 +41,7 @@ export function CTASection() {
               <Button
                 asChild
                 size="lg"
-                className="min-w-[200px] bg-white text-foreground hover:bg-white/90"
+                className="min-w-[200px] bg-white text-neutral-900 hover:bg-white/90"
               >
                 <a href={`${siteConfig.appUrl}/signup`}>
                   Start Browsing Free

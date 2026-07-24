@@ -11,7 +11,7 @@ const stats = [
 
 export function StatsSection() {
   return (
-    <section className="border-y bg-muted/30 px-4 py-16">
+    <section className="border-y border-white/10 px-4 py-16">
       <div className="mx-auto max-w-5xl">
         <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
           {stats.map((stat, i) => (
@@ -23,12 +23,10 @@ export function StatsSection() {
               transition={{ delay: i * 0.1, duration: 0.4 }}
               className="text-center"
             >
-              <p className="text-3xl font-bold tracking-tight sm:text-4xl">
+              <p className="bg-gradient-to-r from-pink-400 via-purple-400 to-indigo-400 bg-clip-text text-3xl font-extrabold tracking-tight text-transparent sm:text-4xl">
                 {stat.value}
               </p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {stat.label}
-              </p>
+              <p className="mt-1 text-sm text-slate-400">{stat.label}</p>
             </motion.div>
           ))}
         </div>

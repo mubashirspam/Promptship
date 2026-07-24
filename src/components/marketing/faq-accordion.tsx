@@ -1,11 +1,7 @@
 "use client";
 
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+import { useState } from "react";
+import { ChevronDown } from "lucide-react";
 
 const faqItems = [
   {
@@ -51,31 +47,69 @@ const faqItems = [
 ] as const;
 
 export function FAQAccordion() {
-  return (
-    <section className="px-4 py-20 sm:py-28">
-      <div className="mx-auto max-w-3xl">
-        <div className="mb-12 text-center">
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-            Frequently asked{" "}
-            <span className="gradient-text">questions</span>
-          </h2>
-          <p className="mx-auto mt-4 max-w-xl text-muted-foreground">
-            Everything you need to know about Promtify.
-          </p>
-        </div>
+  const [openFaq, setOpenFaq] = useState<number | null>(0);
 
-        <Accordion type="single" collapsible className="w-full">
-          {faqItems.map((item, index) => (
-            <AccordionItem key={index} value={`item-${index}`}>
-              <AccordionTrigger className="text-left">
-                {item.question}
-              </AccordionTrigger>
-              <AccordionContent>
-                <p className="text-muted-foreground">{item.answer}</p>
-              </AccordionContent>
-            </AccordionItem>
-          ))}
-        </Accordion>
+  return (
+    <section className="relative z-10 mx-auto max-w-3xl px-4 pt-24 pb-32 sm:px-6 lg:px-8">
+      <div className="mb-16 text-center">
+        <h2 className="mb-4 text-3xl font-extrabold tracking-tight text-white md:text-5xl">
+          Frequently asked{" "}
+          <span className="bg-gradient-to-r from-pink-400 via-purple-400 to-indigo-400 bg-clip-text text-transparent">
+            questions
+          </span>
+        </h2>
+        <p className="text-lg font-medium text-slate-400">
+          Everything you need to know about Promtify.
+        </p>
+      </div>
+
+      <div className="space-y-4">
+        {faqItems.map((faq, index) => {
+          const isOpen = openFaq === index;
+          return (
+            <div
+              key={index}
+              className={`overflow-hidden rounded-2xl border backdrop-blur-xl transition-all duration-300 ${
+                isOpen
+                  ? "border-purple-500/30 bg-white/[0.05] shadow-[0_0_30px_-10px_rgba(168,85,247,0.15)]"
+                  : "border-white/10 bg-white/[0.02] hover:border-white/20 hover:bg-white/[0.04]"
+              }`}
+            >
+              <button
+                onClick={() => setOpenFaq(isOpen ? null : index)}
+                className="flex w-full items-center justify-between p-6 text-left focus:outline-none"
+                aria-expanded={isOpen}
+              >
+                <span
+                  className={`pr-4 text-base font-semibold transition-colors duration-300 md:text-lg ${
+                    isOpen ? "text-white" : "text-slate-200"
+                  }`}
+                >
+                  {faq.question}
+                </span>
+                <div
+                  className={`shrink-0 rounded-full p-1.5 transition-all duration-300 ${
+                    isOpen
+                      ? "rotate-180 bg-purple-500/20 text-purple-400"
+                      : "bg-white/5 text-slate-400 hover:bg-white/10"
+                  }`}
+                >
+                  <ChevronDown size={20} />
+                </div>
+              </button>
+              <div
+                className="grid px-6 transition-all duration-300 ease-in-out"
+                style={{ gridTemplateRows: isOpen ? "1fr" : "0fr" }}
+              >
+                <div className="overflow-hidden">
+                  <p className="pb-6 text-sm leading-relaxed text-slate-400 md:text-base">
+                    {faq.answer}
+                  </p>
+                </div>
+              </div>
+            </div>
+          );
+        })}
       </div>
     </section>
   );

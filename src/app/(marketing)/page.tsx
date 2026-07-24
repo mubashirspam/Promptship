@@ -7,6 +7,7 @@ import { PricingCards } from '@/components/marketing/pricing-cards';
 import { Testimonials } from '@/components/marketing/testimonials';
 import { FAQAccordion } from '@/components/marketing/faq-accordion';
 import { CTASection } from '@/components/marketing/cta-section';
+import { DarkBackdrop } from '@/components/marketing/dark-backdrop';
 
 export default function HomePage() {
   return (
@@ -26,14 +27,20 @@ export default function HomePage() {
         <TemplateShowcase />
       </div>
 
-      {/* Remaining sections — fully outside the parallax zone, no overlap */}
-      <StatsSection />
-      <FeaturesGrid />
-      <HowItWorks />
-      <PricingCards />
-      <Testimonials />
-      <FAQAccordion />
-      <CTASection />
+      {/*
+        One continuous dark backdrop behind every remaining section, so the
+        page reads as one seamless dark canvas instead of pricing being the
+        only dark island.
+      */}
+      <DarkBackdrop>
+        <StatsSection />
+        <FeaturesGrid />
+        <HowItWorks />
+        <PricingCards />
+        <Testimonials />
+        <FAQAccordion />
+        <CTASection />
+      </DarkBackdrop>
     </>
   );
 }

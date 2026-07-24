@@ -3,10 +3,11 @@ import Link from 'next/link';
 import { db } from '@/lib/db';
 import { prompts, categories } from '@/lib/db/schema';
 import { eq, desc, sql } from 'drizzle-orm';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Eye, EyeOff, Star } from 'lucide-react';
+import { PromptStatusToggle } from '@/components/admin/prompt-status-toggle';
+import { Plus, Star } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Manage Prompts',
@@ -42,7 +43,7 @@ export default async function AdminPromptsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="sticky top-0 z-20 flex h-14 items-center justify-between bg-background">
         <div>
           <h1 className="text-2xl font-bold">Manage Prompts</h1>
           <p className="text-sm text-muted-foreground">{total} total prompts</p>
@@ -64,8 +65,8 @@ export default async function AdminPromptsPage() {
       ) : (
         <div className="rounded-md border">
           <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b bg-muted/50">
+            <thead className="sticky top-14 z-10 bg-muted">
+              <tr className="border-b">
                 <th className="px-4 py-3 text-left font-medium">Title</th>
                 <th className="px-4 py-3 text-left font-medium hidden md:table-cell">Category</th>
                 <th className="px-4 py-3 text-left font-medium hidden lg:table-cell">Access</th>
@@ -98,15 +99,7 @@ export default async function AdminPromptsPage() {
                     {p.usageCount}
                   </td>
                   <td className="px-4 py-3 text-center">
-                    {p.isPublished ? (
-                      <Badge variant="default" className="bg-green-600 text-xs">
-                        <Eye className="size-3 mr-1" /> Live
-                      </Badge>
-                    ) : (
-                      <Badge variant="secondary" className="text-xs">
-                        <EyeOff className="size-3 mr-1" /> Draft
-                      </Badge>
-                    )}
+                    <PromptStatusToggle id={p.id} initialIsPublished={!!p.isPublished} />
                   </td>
                   <td className="px-4 py-3 text-right">
                     <Link href={`/prompts/${p.id}/edit`}>
