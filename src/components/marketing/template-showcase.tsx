@@ -9,18 +9,7 @@ import {
   type MotionValue,
 } from "motion/react";
 import { cn } from "@/lib/utils";
-import {
-  Rocket,
-  LayoutDashboard,
-  Shield,
-  ShoppingCart,
-  Layers,
-  Eye,
-  Copy,
-  Lock,
-  Loader2,
-  ArrowRight,
-} from "lucide-react";
+import { Copy, Lock, Loader2, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
 interface Template {
@@ -38,31 +27,9 @@ interface Template {
   categorySlug: string;
 }
 
-interface Category {
-  id: string;
-  name: string;
-  slug: string;
-  description: string;
-}
-
 interface MarketingData {
   templates: Template[];
-  categories: Category[];
 }
-
-const iconMap = {
-  "landing-pages": Rocket,
-  dashboards: LayoutDashboard,
-  authentication: Shield,
-  "e-commerce": ShoppingCart,
-  components: Layers,
-  "saas-apps": LayoutDashboard,
-  portfolio: Eye,
-  "blog-content": Layers,
-  "forms-ui": Shield,
-  "social-community": ShoppingCart,
-  all: Layers,
-} as const;
 
 function isVideoUrl(url: string | null | undefined): boolean {
   if (!url) return false;
@@ -89,39 +56,24 @@ function getGradient(id: string) {
   return gradients[sum % gradients.length];
 }
 
-// Card aspect ratios cycle to create masonry-like height variety
-const aspects = [
-  "aspect-[4/5]",
-  "aspect-[3/4]",
-  "aspect-[16/11]",
-  "aspect-[2/3]",
-  "aspect-[4/5]",
-  "aspect-video",
-  "aspect-[3/4]",
-  "aspect-[4/5]",
-  "aspect-[16/11]",
-  "aspect-[3/4]",
-  "aspect-[2/3]",
-  "aspect-video",
-];
-
-/** Full-bleed masonry card matching the reference design */
-function TemplateCard({
-  template,
-  index,
-}: {
-  template: Template;
-  index: number;
-}) {
+/**
+ * Masonry card that renders the preview at its NATURAL aspect ratio — the
+ * media defines the card height (no cropping), so a 16:9 clip and a 3:4 poster
+ * sit at their true proportions and the columns pack organically.
+ */
+function TemplateCard({ template }: { template: Template }) {
   const mediaSrc = template.previewVideoUrl || template.previewImageUrl;
   const asVideo = isVideoUrl(mediaSrc);
-  const aspect = aspects[index % aspects.length];
+
+  const href = template.categorySlug
+    ? `/templates/${template.categorySlug}/${template.slug}`
+    : `/templates/${template.slug}`;
 
   return (
-    <Link href={`/prompts/${template.slug}`}>
-      <div className="group relative overflow-hidden rounded-2xl border border-white/[0.08] bg-[#111] transition-all duration-300 hover:border-white/20 hover:scale-[1.01]">
-        <div className={cn("relative w-full", aspect)}>
-          {/* Media */}
+    <Link href={href}>
+      <div className="group relative overflow-hidden rounded-2xl border border-white/[0.08] bg-[#111] transition-colors duration-300 hover:border-white/20">
+        <div className="relative w-full">
+          {/* Media — sized by intrinsic ratio (w-full + h-auto), never cropped */}
           {asVideo && mediaSrc ? (
             <video
               src={mediaSrc}
@@ -129,29 +81,32 @@ function TemplateCard({
               muted
               loop
               playsInline
-              className="absolute inset-0 h-full w-full object-cover"
+              preload="metadata"
+              className="block h-auto w-full"
             />
           ) : mediaSrc ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={mediaSrc}
               alt={template.title}
-              className="absolute inset-0 h-full w-full object-cover"
+              loading="lazy"
+              className="block h-auto w-full"
             />
           ) : (
+            // No preview: keep a sensible height so the card isn't zero-height
             <div
               className={cn(
-                "absolute inset-0 bg-gradient-to-br",
+                "aspect-[4/3] w-full bg-gradient-to-br",
                 getGradient(template.id)
               )}
             />
           )}
 
-          {/* Dark gradient for text legibility */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/10 to-transparent" />
+          {/* Dark gradient — hidden until hover, so the card is preview-only by default */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/10 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 
-          {/* Bottom info bar */}
-          <div className="absolute inset-x-0 bottom-0 p-4">
+          {/* Info bar — name + category fade/slide in on hover only */}
+          <div className="absolute inset-x-0 bottom-0 translate-y-1 p-4 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
             <div className="flex items-end justify-between gap-2">
               <div className="min-w-0">
                 <p className="truncate text-[15px] font-bold leading-tight text-white">
@@ -162,12 +117,12 @@ function TemplateCard({
                 </p>
               </div>
 
-              {/* Action chip */}
+              {/* Access chip */}
               <div
                 className={cn(
-                  "flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-semibold backdrop-blur-sm transition-opacity",
+                  "flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-semibold backdrop-blur-sm",
                   template.isFree
-                    ? "bg-white/15 text-white group-hover:bg-white/25"
+                    ? "bg-white/15 text-white"
                     : "bg-white/10 text-white/60"
                 )}
               >
@@ -237,7 +192,6 @@ function DottedPath({
 
 export function TemplateShowcase() {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const [activeCategory, setActiveCategory] = useState("all");
   const [data, setData] = useState<MarketingData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -258,22 +212,9 @@ export function TemplateShowcase() {
       .finally(() => setLoading(false));
   }, []);
 
-  const categories = data
-    ? [
-        { slug: "all", name: "All", icon: Layers },
-        ...data.categories.map((c) => ({
-          slug: c.slug,
-          name: c.name,
-          icon: iconMap[c.slug as keyof typeof iconMap] || Layers,
-        })),
-      ]
-    : [];
-
-  const filtered = !data
-    ? []
-    : activeCategory === "all"
-      ? data.templates
-      : data.templates.filter((t) => t.categorySlug === activeCategory);
+  // Homepage shows ~12 rows across 3 columns (the API already caps at 36);
+  // the button always sends people to the full catalog at /prompts.
+  const visible = data ? data.templates.slice(0, 36) : [];
 
   return (
     <motion.div
@@ -292,35 +233,13 @@ export function TemplateShowcase() {
             <span className="h-1.5 w-1.5 rounded-full bg-indigo-400" />
             Prompt Templates
           </div>
-          <h2 className="font-instrument-serif text-4xl font-normal tracking-tight text-white sm:text-5xl">
-            Production-ready{" "}
-            <em className="not-italic text-white/40">from day one.</em>
+          <h2 className="text-4xl font-semibold tracking-tight text-white sm:text-5xl">
+            Production-ready <span className="text-white/40">from day one.</span>
           </h2>
           <p className="mx-auto mt-3 max-w-xl text-[15px] leading-relaxed text-white/40">
             Hand-crafted prompts that generate real UI — tested across Flutter, React, and beyond.
           </p>
         </div>
-
-        {/* Category pills */}
-        {!loading && data && (
-          <div className="mb-8 flex flex-wrap items-center justify-center gap-2">
-            {categories.map((cat) => (
-              <button
-                key={cat.slug}
-                onClick={() => setActiveCategory(cat.slug)}
-                className={cn(
-                  "inline-flex items-center gap-1.5 rounded-full border px-4 py-1.5 text-xs font-medium transition-all duration-200",
-                  activeCategory === cat.slug
-                    ? "border-white/20 bg-white/10 text-white"
-                    : "border-white/[0.08] text-white/40 hover:border-white/15 hover:text-white/70"
-                )}
-              >
-                <cat.icon className="size-3" />
-                {cat.name}
-              </button>
-            ))}
-          </div>
-        )}
 
         {/* Loading */}
         {loading && (
@@ -343,30 +262,36 @@ export function TemplateShowcase() {
             <AnimatePresence mode="popLayout">
               <motion.div
                 layout
-                className="columns-2 gap-3 sm:columns-3 lg:columns-4"
+                className="columns-1 gap-4 sm:columns-2 lg:columns-3"
               >
-                {filtered.map((template, i) => (
+                {visible.map((template, i) => (
                   <motion.div
                     key={template.id}
                     layout
-                    initial={{ opacity: 0, scale: 0.95 }}
+                    initial={{ opacity: 0, scale: 0.97 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ duration: 0.2, delay: i * 0.03 }}
-                    className="mb-3 break-inside-avoid"
+                    exit={{ opacity: 0, scale: 0.97 }}
+                    transition={{ duration: 0.2, delay: Math.min(i, 12) * 0.02 }}
+                    className="mb-4 break-inside-avoid"
                   >
-                    <TemplateCard template={template} index={i} />
+                    <TemplateCard template={template} />
                   </motion.div>
                 ))}
               </motion.div>
             </AnimatePresence>
 
+            {visible.length === 0 && (
+              <p className="py-16 text-center text-sm text-white/30">
+                No templates in this category yet.
+              </p>
+            )}
+
             <div className="mt-12 text-center">
               <Link
-                href="/prompts"
+                href="/templates"
                 className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-8 py-3 text-sm font-medium text-white/70 transition-all hover:border-white/25 hover:bg-white/10 hover:text-white"
               >
-                Browse All Templates
+                Explore full library
                 <ArrowRight className="size-4" />
               </Link>
             </div>

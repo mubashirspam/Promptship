@@ -45,7 +45,7 @@ export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const subdomain = getSubdomain(host);
 
-  // Static assets (/logo.svg, fonts, images from /public) are served at the
+  // Static assets (/logo.png, fonts, images from /public) are served at the
   // root path and must never be auth-gated or rewritten
   if (/\.\w+$/.test(pathname) && !pathname.startsWith('/api/')) {
     return NextResponse.next();

@@ -37,7 +37,7 @@ export function MarketingFooter() {
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-5">
           {/* Brand column */}
           <div className="lg:col-span-2">
-            <Logo />
+            <Logo textClassName="text-2xl font-bold text-white" />
             <p className="mt-3 max-w-xs text-sm text-slate-400">
               Premium Figma Kits, AI Prompts and Code Starters. Pay once, own
               it forever.

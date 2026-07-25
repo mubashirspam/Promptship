@@ -65,14 +65,14 @@ export default async function AdminPromptsPage() {
       ) : (
         <div className="rounded-md border">
           <table className="w-full text-sm">
-            <thead className="sticky top-14 z-10 bg-muted">
+            <thead>
               <tr className="border-b">
-                <th className="px-4 py-3 text-left font-medium">Title</th>
-                <th className="px-4 py-3 text-left font-medium hidden md:table-cell">Category</th>
-                <th className="px-4 py-3 text-left font-medium hidden lg:table-cell">Access</th>
-                <th className="px-4 py-3 text-center font-medium hidden lg:table-cell">Uses</th>
-                <th className="px-4 py-3 text-center font-medium">Status</th>
-                <th className="px-4 py-3 text-right font-medium">Actions</th>
+                <th className="sticky top-14 z-10 bg-muted px-4 py-3 text-left font-medium">Title</th>
+                <th className="sticky top-14 z-10 bg-muted px-4 py-3 text-left font-medium hidden md:table-cell">Category</th>
+                <th className="sticky top-14 z-10 bg-muted px-4 py-3 text-left font-medium hidden lg:table-cell">Access</th>
+                <th className="sticky top-14 z-10 bg-muted px-4 py-3 text-center font-medium hidden lg:table-cell">Uses</th>
+                <th className="sticky top-14 z-10 bg-muted px-4 py-3 text-center font-medium">Status</th>
+                <th className="sticky top-14 z-10 bg-muted px-4 py-3 text-right font-medium">Actions</th>
               </tr>
             </thead>
             <tbody>
