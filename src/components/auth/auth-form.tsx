@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Mail, Lock, Eye, EyeOff, Loader2, ShieldCheck } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, Loader2 } from 'lucide-react';
 import {
   signInSchema,
   type SignInInput,
@@ -15,75 +15,54 @@ import { Label } from '@/components/ui/label';
 import { SocialButtons } from '@/components/auth/social-buttons';
 import { getRedirectUrl } from '@/lib/auth/redirect';
 
-export function AuthForm() {
-  const [showAdminLogin, setShowAdminLogin] = useState(false);
+/**
+ * `allowEmailLogin` is decided server-side (login page checks the secret key).
+ * When false, only social sign-in shows — the admin email/password entry point
+ * is never rendered or hinted at.
+ */
+export function AuthForm({
+  allowEmailLogin = false,
+}: {
+  allowEmailLogin?: boolean;
+}) {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
 
+  if (allowEmailLogin) {
+    return (
+      <div className="w-full max-w-[420px]">
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold tracking-tight">Sign in</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Enter your credentials to continue
+          </p>
+        </div>
+
+        {error && (
+          <div className="mb-4 rounded-lg border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+            {error}
+          </div>
+        )}
+
+        <AdminSignInForm
+          showPassword={showPassword}
+          setShowPassword={setShowPassword}
+          setError={setError}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="w-full max-w-[420px]">
-      {!showAdminLogin ? (
-        <>
-          {/* Regular user login */}
-          <div className="mb-8">
-            <h1 className="text-2xl font-bold tracking-tight">Welcome to Promtify</h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Sign in with your Google or GitHub account to get started
-            </p>
-          </div>
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold tracking-tight">Welcome to Promtify</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Sign in with your Google or GitHub account to get started
+        </p>
+      </div>
 
-          {/* Social buttons for regular users */}
-          <SocialButtons />
-
-          {/* Admin login toggle */}
-          <div className="mt-8 pt-6 border-t">
-            <button
-              type="button"
-              onClick={() => setShowAdminLogin(true)}
-              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mx-auto"
-            >
-              <ShieldCheck className="size-4" />
-              Admin Login
-            </button>
-          </div>
-        </>
-      ) : (
-        <>
-          {/* Admin login */}
-          <div className="mb-8">
-            <h1 className="text-2xl font-bold tracking-tight">Admin Access</h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Sign in with your admin credentials
-            </p>
-          </div>
-
-          {/* Error message */}
-          {error && (
-            <div className="mb-4 rounded-lg border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive">
-              {error}
-            </div>
-          )}
-
-          {/* Admin email/password form */}
-          <AdminSignInForm
-            showPassword={showPassword}
-            setShowPassword={setShowPassword}
-            setError={setError}
-          />
-
-          {/* Back to user login */}
-          <button
-            type="button"
-            onClick={() => {
-              setShowAdminLogin(false);
-              setError('');
-            }}
-            className="mt-6 text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            ← Back to user login
-          </button>
-        </>
-      )}
+      <SocialButtons />
     </div>
   );
 }
@@ -122,7 +101,7 @@ function AdminSignInForm({
 
       // 2FA-enabled accounts get a challenge before a session exists
       if ((result.data as { twoFactorRedirect?: boolean } | null)?.twoFactorRedirect) {
-        window.location.href = '/verify-2fa';
+        window.location.assign('/verify-2fa');
         return;
       }
 
