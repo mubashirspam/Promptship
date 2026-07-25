@@ -133,7 +133,7 @@ describe('admin subdomain', () => {
 describe('static assets', () => {
   it('never gates or rewrites public files on any subdomain', async () => {
     for (const host of [ROOT, `app.${ROOT}`, `admin.${ROOT}`]) {
-      const res = await run(host, '/logo.svg');
+      const res = await run(host, '/logo.png');
       expect(location(res)).toBeNull();
       expect(rewrite(res)).toBeNull();
     }

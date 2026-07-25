@@ -142,6 +142,7 @@ export const adminNavigation = [
 
 // ─── Marketing (promtify.dev) ────────────────────────────────
 export const marketingNavigation = [
+  { title: 'Templates', href: '/templates' },
   { title: 'Features', href: '/#features' },
   { title: 'Pricing', href: '/pricing' },
   { title: 'Blog', href: '/blog' },

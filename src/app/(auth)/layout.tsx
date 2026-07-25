@@ -38,7 +38,7 @@ export default async function AuthLayout({
         {/* Logo */}
         <div className="relative z-10">
           <div className="flex items-center gap-3">
-            <Image src="/logo.svg" alt="Promtify" width={32} height={32} />
+            <Image src="/logo.png" alt="Promtify" width={32} height={32} />
             <span className="text-2xl font-bold text-white">Promtify</span>
           </div>
         </div>
@@ -94,7 +94,7 @@ export default async function AuthLayout({
       <div className="flex w-full flex-col items-center justify-center px-6 py-12 lg:w-1/2">
         {/* Logo — visible only on mobile (left panel is hidden on small screens) */}
         <div className="mb-8 flex items-center gap-2 lg:hidden">
-          <Image src="/logo.svg" alt="Promtify" width={28} height={28} />
+          <Image src="/logo.png" alt="Promtify" width={28} height={28} />
           <span className="text-xl font-bold">Promtify</span>
         </div>
         {children}

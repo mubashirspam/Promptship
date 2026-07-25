@@ -23,6 +23,7 @@ export const CATEGORY_MAP: Record<string, { slug: string; name: string }> = {
   'Hover Effect': { slug: 'hover-effect', name: 'Hover Effects' },
   'Mouse Effect': { slug: 'mouse-effect', name: 'Mouse Effects' },
   'Navigation Menu': { slug: 'navigation-menu', name: 'Navigation Menus' },
+  'Scroll Animation': { slug: 'scroll-animation', name: 'Scroll Animation' },
   'Page Transition': { slug: 'page-transition', name: 'Page Transitions' },
   'Physics Effect': { slug: 'physics-effect', name: 'Physics Effects' },
   'SVG Animation': { slug: 'svg-animation', name: 'SVG Animation' },

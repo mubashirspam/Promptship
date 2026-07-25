@@ -29,7 +29,7 @@ export function MarketingHeader() {
       )}
     >
       <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Logo />
+        <Logo textClassName="text-2xl font-bold text-white" />
 
         {/* Desktop navigation */}
         <nav className="hidden items-center gap-6 md:flex">

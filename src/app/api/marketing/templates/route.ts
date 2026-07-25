@@ -25,7 +25,8 @@ export async function GET() {
       .leftJoin(categories, eq(prompts.categoryId, categories.id))
       .where(eq(prompts.isPublished, true))
       .orderBy(desc(prompts.isFeatured), desc(prompts.copyCount))
-      .limit(12);
+      // 12 rows × 3 columns for the homepage showcase; full catalog lives at /prompts
+      .limit(36);
 
     // Get all categories for filtering
     const allCategories = await db()
