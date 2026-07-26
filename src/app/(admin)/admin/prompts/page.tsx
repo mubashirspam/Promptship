@@ -8,6 +8,11 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { PromptStatusToggle } from '@/components/admin/prompt-status-toggle';
 import { PromptFeaturedToggle } from '@/components/admin/prompt-featured-toggle';
+import { PromptPromoteButton } from '@/components/admin/prompt-promote-button';
+import {
+  canPromoteToProduction,
+  getProductionStatusBySlug,
+} from '@/lib/templates/promote-to-production';
 import { Plus } from 'lucide-react';
 
 export const metadata: Metadata = {
@@ -31,6 +36,7 @@ export default async function AdminPromptsPage() {
         isFeatured: prompts.isFeatured,
         isPublished: prompts.isPublished,
         createdAt: prompts.createdAt,
+        updatedAt: prompts.updatedAt,
         categoryName: categories.name,
       })
       .from(prompts)
@@ -41,6 +47,14 @@ export default async function AdminPromptsPage() {
   ]);
 
   const total = countResult[0]?.count ?? 0;
+
+  // "Push to production" is only wired up where DATABASE_URL_PRODUCTION is
+  // configured for this deployment (staging/local) — never on production
+  // itself, which has nothing to promote to.
+  const canPromote = canPromoteToProduction();
+  const productionStatus = canPromote
+    ? await getProductionStatusBySlug(allPrompts.map((p) => p.slug))
+    : new Map<string, { updatedAt: Date }>();
 
   return (
     <div className="space-y-6">
@@ -74,6 +88,9 @@ export default async function AdminPromptsPage() {
                 <th className="sticky top-14 z-10 bg-muted px-4 py-3 text-center font-medium hidden lg:table-cell">Uses</th>
                 <th className="sticky top-14 z-10 bg-muted px-4 py-3 text-center font-medium">Status</th>
                 <th className="sticky top-14 z-10 bg-muted px-4 py-3 text-center font-medium">Featured</th>
+                {canPromote && (
+                  <th className="sticky top-14 z-10 bg-muted px-4 py-3 text-center font-medium">Production</th>
+                )}
                 <th className="sticky top-14 z-10 bg-muted px-4 py-3 text-right font-medium">Actions</th>
               </tr>
             </thead>
@@ -103,6 +120,20 @@ export default async function AdminPromptsPage() {
                   <td className="px-4 py-3 text-center">
                     <PromptFeaturedToggle id={p.id} initialIsFeatured={!!p.isFeatured} />
                   </td>
+                  {canPromote && (
+                    <td className="px-4 py-3 text-center">
+                      <PromptPromoteButton
+                        id={p.id}
+                        initialStatus={
+                          !productionStatus.has(p.slug)
+                            ? 'not-promoted'
+                            : productionStatus.get(p.slug)!.updatedAt < p.updatedAt
+                              ? 'outdated'
+                              : 'in-sync'
+                        }
+                      />
+                    </td>
+                  )}
                   <td className="px-4 py-3 text-right">
                     <Link href={`/prompts/${p.id}/edit`}>
                       <Button variant="ghost" size="sm">Edit</Button>
