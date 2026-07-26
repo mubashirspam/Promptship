@@ -7,7 +7,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { PromptStatusToggle } from '@/components/admin/prompt-status-toggle';
-import { Plus, Star } from 'lucide-react';
+import { PromptFeaturedToggle } from '@/components/admin/prompt-featured-toggle';
+import { Plus } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Manage Prompts',
@@ -72,6 +73,7 @@ export default async function AdminPromptsPage() {
                 <th className="sticky top-14 z-10 bg-muted px-4 py-3 text-left font-medium hidden lg:table-cell">Access</th>
                 <th className="sticky top-14 z-10 bg-muted px-4 py-3 text-center font-medium hidden lg:table-cell">Uses</th>
                 <th className="sticky top-14 z-10 bg-muted px-4 py-3 text-center font-medium">Status</th>
+                <th className="sticky top-14 z-10 bg-muted px-4 py-3 text-center font-medium">Featured</th>
                 <th className="sticky top-14 z-10 bg-muted px-4 py-3 text-right font-medium">Actions</th>
               </tr>
             </thead>
@@ -79,10 +81,7 @@ export default async function AdminPromptsPage() {
               {allPrompts.map((p) => (
                 <tr key={p.id} className="border-b last:border-0 hover:bg-muted/30">
                   <td className="px-4 py-3">
-                    <div className="flex items-center gap-2">
-                      {p.isFeatured && <Star className="size-3 text-yellow-500 fill-yellow-500" />}
-                      <span className="font-medium">{p.title}</span>
-                    </div>
+                    <span className="font-medium">{p.title}</span>
                     <p className="text-xs text-muted-foreground mt-0.5 truncate max-w-[300px]">
                       {p.description}
                     </p>
@@ -100,6 +99,9 @@ export default async function AdminPromptsPage() {
                   </td>
                   <td className="px-4 py-3 text-center">
                     <PromptStatusToggle id={p.id} initialIsPublished={!!p.isPublished} />
+                  </td>
+                  <td className="px-4 py-3 text-center">
+                    <PromptFeaturedToggle id={p.id} initialIsFeatured={!!p.isFeatured} />
                   </td>
                   <td className="px-4 py-3 text-right">
                     <Link href={`/prompts/${p.id}/edit`}>
