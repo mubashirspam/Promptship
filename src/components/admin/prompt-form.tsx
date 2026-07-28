@@ -179,7 +179,7 @@ export function PromptForm({ categories, initialData }: PromptFormProps) {
         return;
       }
 
-      router.push('/prompts');
+      router.push('/templates');
       router.refresh();
     } catch {
       setError('Network error');
@@ -529,13 +529,13 @@ export function PromptForm({ categories, initialData }: PromptFormProps) {
             <Button
               type="button"
               variant="outline"
-              onClick={() => router.push('/prompts')}
+              onClick={() => router.push('/templates')}
             >
               Cancel
             </Button>
             <Button type="submit" disabled={loading}>
               {loading && <Loader2 className="size-4 mr-1 animate-spin" />}
-              {isEditing ? 'Update Prompt' : 'Create Prompt'}
+              {isEditing ? 'Update Template' : 'Create Template'}
             </Button>
           </div>
         </CardContent>

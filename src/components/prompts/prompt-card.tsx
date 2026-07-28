@@ -26,7 +26,8 @@ export interface Prompt {
   templateType?: 'full' | 'component' | string | null;
   /** web | mobile | universal */
   platform?: string | null;
-  frameworks: string[];
+  /** Nullable in the DB — rows imported without frameworks come back as null */
+  frameworks: string[] | null;
   categoryName: string;
   previewImageUrl: string | null;
   previewVideoUrl?: string | null; // Video/GIF preview support
@@ -236,7 +237,7 @@ export function PromptCard({
             </Badge>
           )}
           <div className="ml-auto flex items-center gap-1">
-            {prompt.frameworks.map((fw) => (
+            {(prompt.frameworks ?? []).map((fw) => (
               <span
                 key={fw}
                 className="size-2.5 rounded-full"

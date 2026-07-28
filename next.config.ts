@@ -23,6 +23,14 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // The Prompts section was merged into Templates; keep old deep links alive
+  // (bookmarks, the marketing site, and any indexed /prompts/<category> URLs).
+  async redirects() {
+    return [
+      { source: '/prompts', destination: '/templates', permanent: true },
+      { source: '/prompts/:path*', destination: '/templates', permanent: true },
+    ];
+  },
   async headers() {
     return [
       {

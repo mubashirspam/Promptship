@@ -21,9 +21,9 @@ const actions: QuickAction[] = [
     iconClassName: 'text-purple-400',
   },
   {
-    title: 'Browse Prompts',
+    title: 'Browse Templates',
     subtitle: '100+ templates',
-    href: '/prompts',
+    href: '/templates',
     icon: FileText,
     iconClassName: 'text-cyan-400',
   },

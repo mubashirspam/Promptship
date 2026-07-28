@@ -6,16 +6,16 @@ import { eq, asc } from 'drizzle-orm';
 import { PromptForm } from '@/components/admin/prompt-form';
 
 export const metadata: Metadata = {
-  title: 'Edit Prompt',
+  title: 'Edit Template',
 };
 
 export const dynamic = 'force-dynamic';
 
-interface EditPromptPageProps {
+interface EditTemplatePageProps {
   params: Promise<{ id: string }>;
 }
 
-export default async function EditPromptPage({ params }: EditPromptPageProps) {
+export default async function EditTemplatePage({ params }: EditTemplatePageProps) {
   const { id } = await params;
 
   const [promptResult, allCategories] = await Promise.all([
@@ -31,7 +31,7 @@ export default async function EditPromptPage({ params }: EditPromptPageProps) {
 
   return (
     <div className="space-y-6 max-w-4xl">
-      <h1 className="text-2xl font-bold">Edit Prompt</h1>
+      <h1 className="text-2xl font-bold">Edit Template</h1>
       <PromptForm categories={allCategories} initialData={prompt} />
     </div>
   );

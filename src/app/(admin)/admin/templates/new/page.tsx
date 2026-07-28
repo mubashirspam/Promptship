@@ -5,12 +5,12 @@ import { asc } from 'drizzle-orm';
 import { PromptForm } from '@/components/admin/prompt-form';
 
 export const metadata: Metadata = {
-  title: 'New Prompt',
+  title: 'New Template',
 };
 
 export const dynamic = 'force-dynamic';
 
-export default async function NewPromptPage() {
+export default async function NewTemplatePage() {
   const allCategories = await db()
     .select({ id: categories.id, name: categories.name, slug: categories.slug, parentId: categories.parentId })
     .from(categories)
@@ -18,7 +18,7 @@ export default async function NewPromptPage() {
 
   return (
     <div className="space-y-6 max-w-4xl">
-      <h1 className="text-2xl font-bold">Create New Prompt</h1>
+      <h1 className="text-2xl font-bold">Create New Template</h1>
       <PromptForm categories={allCategories} />
     </div>
   );

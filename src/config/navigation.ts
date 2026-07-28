@@ -34,12 +34,9 @@ export const appNavigation: NavItem[] = [
     href: '/dashboard',
     icon: Home,
   },
-  {
-    title: 'Prompts',
-    href: '/prompts',
-    icon: FileText,
-    badge: '100+',
-  },
+  // Prompts and Templates were two views of the same catalog — Templates is
+  // now the single entry point, with the kind tabs (Figma / AI Prompts / Code)
+  // covering what the Prompts section used to show.
   {
     title: 'Templates',
     href: '/templates',
@@ -86,7 +83,7 @@ export const settingsItem: NavItem = {
 
 // ─── Admin portal (admin.promtify.dev) ───────────────────────
 // Relative paths on the admin subdomain.
-// The proxy rewrites / → /admin, /prompts → /admin/prompts, etc.
+// The proxy rewrites / → /admin, /templates → /admin/templates, etc.
 export const adminNavigation = [
   {
     title: 'Dashboard',
@@ -94,8 +91,8 @@ export const adminNavigation = [
     icon: LayoutDashboard,
   },
   {
-    title: 'Prompts',
-    href: '/prompts',
+    title: 'Templates',
+    href: '/templates',
     icon: FileText,
   },
   {
