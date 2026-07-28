@@ -1,18 +1,15 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { prompts, categories } from '@/lib/db/schema';
-import { eq, desc } from 'drizzle-orm';
+import { and, eq, desc } from 'drizzle-orm';
 
-// 12 rows × 3 columns for the homepage showcase; full catalog lives at /templates
-const HOMEPAGE_LIMIT = 36;
+// Fallback only: if nothing is marked Featured in admin, the homepage would be
+// empty, so fall back to a balanced mix capped at this many cards.
+const FALLBACK_LIMIT = 36;
 
 export async function GET() {
   try {
-    // Pull every published template, admin-curated ("Featured") ones first,
-    // then most-copied. Ties (e.g. freshly seeded rows with copyCount=0) fall
-    // back to newest first.
-    const rows = await db()
-      .select({
+    const columns = {
         id: prompts.id,
         title: prompts.title,
         slug: prompts.slug,
@@ -26,36 +23,51 @@ export async function GET() {
         previewVideoUrl: prompts.previewVideoUrl,
         categoryName: categories.name,
         categorySlug: categories.slug,
-      })
+    } as const;
+
+    // The homepage shows exactly what admin marked as Featured — all of it, in
+    // curation order. No cap: the showcase length is a merchandising decision
+    // made in admin, not a number hardcoded here.
+    const featured = await db()
+      .select(columns)
       .from(prompts)
       .leftJoin(categories, eq(prompts.categoryId, categories.id))
-      .where(eq(prompts.isPublished, true))
-      .orderBy(desc(prompts.isFeatured), desc(prompts.copyCount), desc(prompts.createdAt));
+      .where(and(eq(prompts.isPublished, true), eq(prompts.isFeatured, true)))
+      .orderBy(desc(prompts.copyCount), desc(prompts.createdAt));
 
-    // Group by asset kind (code / figma / ai_prompt) so a kind with far more
-    // rows (e.g. 249 code templates) can't crowd the others out of the top 36
-    // by sheer count. Round-robin merge the groups, so each kind's best items
-    // (featured first, per the ordering above) get a fair shot at a slot.
-    // Marking a template "Featured" in admin still guarantees it lands near
-    // the front, since it sits at the top of its group going into the merge.
-    const groups = new Map<string, typeof rows>();
-    for (const row of rows) {
-      const key = row.assetKind ?? 'other';
-      const group = groups.get(key);
-      if (group) group.push(row);
-      else groups.set(key, [row]);
-    }
-    const groupArrays = [...groups.values()];
+    let featuredTemplates = featured;
 
-    const featuredTemplates: typeof rows = [];
-    for (let i = 0; featuredTemplates.length < HOMEPAGE_LIMIT; i++) {
-      const before = featuredTemplates.length;
-      for (const group of groupArrays) {
-        if (i >= group.length) continue;
-        featuredTemplates.push(group[i]);
-        if (featuredTemplates.length >= HOMEPAGE_LIMIT) break;
+    // Nothing curated yet — fall back to a balanced mix so the homepage still
+    // has something to show. Grouping by asset kind stops the kind with the
+    // most rows (e.g. 249 code starters) from crowding out the others.
+    if (featuredTemplates.length === 0) {
+      const rows = await db()
+        .select(columns)
+        .from(prompts)
+        .leftJoin(categories, eq(prompts.categoryId, categories.id))
+        .where(eq(prompts.isPublished, true))
+        .orderBy(desc(prompts.copyCount), desc(prompts.createdAt));
+
+      const groups = new Map<string, typeof rows>();
+      for (const row of rows) {
+        const key = row.assetKind ?? 'other';
+        const group = groups.get(key);
+        if (group) group.push(row);
+        else groups.set(key, [row]);
       }
-      if (featuredTemplates.length === before) break; // every group exhausted
+      const groupArrays = [...groups.values()];
+
+      const mixed: typeof rows = [];
+      for (let i = 0; mixed.length < FALLBACK_LIMIT; i++) {
+        const before = mixed.length;
+        for (const group of groupArrays) {
+          if (i >= group.length) continue;
+          mixed.push(group[i]);
+          if (mixed.length >= FALLBACK_LIMIT) break;
+        }
+        if (mixed.length === before) break; // every group exhausted
+      }
+      featuredTemplates = mixed;
     }
 
     // Get all categories for filtering

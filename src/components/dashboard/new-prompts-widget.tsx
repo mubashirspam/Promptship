@@ -52,7 +52,7 @@ export function NewPromptsWidget({
         {prompts.map((prompt) => (
           <Link
             key={prompt.id}
-            href="/prompts"
+            href="/templates"
             className="group flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-muted"
           >
             {/* Small gradient thumbnail */}

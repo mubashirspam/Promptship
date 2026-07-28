@@ -17,7 +17,7 @@ import { Plus, ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export const metadata: Metadata = {
-  title: 'Manage Prompts',
+  title: 'Manage Templates',
 };
 
 export const dynamic = 'force-dynamic';
@@ -33,7 +33,7 @@ const PROD_FILTERS: { value: ProdFilter; label: string }[] = [
   { value: 'in-sync', label: 'In prod' },
 ];
 
-export default async function AdminPromptsPage({
+export default async function AdminTemplatesPage({
   searchParams,
 }: {
   searchParams: Promise<{ page?: string; prod?: string }>;
@@ -102,27 +102,27 @@ export default async function AdminPromptsPage({
     if (nextPage > 1) params.set('page', String(nextPage));
     if (nextProd !== 'all') params.set('prod', nextProd);
     const qs = params.toString();
-    return qs ? `/prompts?${qs}` : '/prompts';
+    return qs ? `/templates?${qs}` : '/templates';
   }
 
   return (
     <div className="space-y-6">
       <div className="sticky top-0 z-20 flex h-14 items-center justify-between bg-background">
         <div>
-          <h1 className="text-2xl font-bold">Manage Prompts</h1>
+          <h1 className="text-2xl font-bold">Manage Templates</h1>
           <p className="text-sm text-muted-foreground">
-            {total} total prompts
+            {total} total templates
             {canPromote && filtered.length !== allPrompts.length && (
               <> · {filtered.length} matching filter</>
             )}
           </p>
         </div>
-        <Link href="/prompts/new">
-          <Button>
+        <Button asChild>
+          <Link href="/templates/new">
             <Plus className="size-4 mr-1" />
-            Add Prompt
-          </Button>
-        </Link>
+            Add Template
+          </Link>
+        </Button>
       </div>
 
       {canPromote && (
@@ -143,13 +143,13 @@ export default async function AdminPromptsPage({
       {allPrompts.length === 0 ? (
         <Card>
           <CardContent className="py-10 text-center">
-            <p className="text-muted-foreground">No prompts yet. Add your first prompt to get started.</p>
+            <p className="text-muted-foreground">No templates yet. Add your first template to get started.</p>
           </CardContent>
         </Card>
       ) : filtered.length === 0 ? (
         <Card>
           <CardContent className="py-10 text-center">
-            <p className="text-muted-foreground">No prompts match this filter.</p>
+            <p className="text-muted-foreground">No templates match this filter.</p>
           </CardContent>
         </Card>
       ) : (
@@ -202,9 +202,9 @@ export default async function AdminPromptsPage({
                       </td>
                     )}
                     <td className="px-4 py-3 text-right">
-                      <Link href={`/prompts/${p.id}/edit`}>
-                        <Button variant="ghost" size="sm">Edit</Button>
-                      </Link>
+                      <Button asChild variant="ghost" size="sm">
+                        <Link href={`/templates/${p.id}/edit`}>Edit</Link>
+                      </Button>
                     </td>
                   </tr>
                 ))}
@@ -218,26 +218,28 @@ export default async function AdminPromptsPage({
                 Page {currentPage} of {totalPages} ({filtered.length} rows)
               </p>
               <div className="flex items-center gap-2">
-                <Link
-                  href={pageHref(currentPage - 1)}
-                  aria-disabled={currentPage <= 1}
-                  className={cn(currentPage <= 1 && 'pointer-events-none')}
+                <Button
+                  asChild
+                  variant="outline"
+                  size="sm"
+                  className={cn(currentPage <= 1 && 'pointer-events-none opacity-50')}
                 >
-                  <Button variant="outline" size="sm" disabled={currentPage <= 1}>
+                  <Link href={pageHref(currentPage - 1)} aria-disabled={currentPage <= 1}>
                     <ChevronLeft className="size-4" />
                     Prev
-                  </Button>
-                </Link>
-                <Link
-                  href={pageHref(currentPage + 1)}
-                  aria-disabled={currentPage >= totalPages}
-                  className={cn(currentPage >= totalPages && 'pointer-events-none')}
+                  </Link>
+                </Button>
+                <Button
+                  asChild
+                  variant="outline"
+                  size="sm"
+                  className={cn(currentPage >= totalPages && 'pointer-events-none opacity-50')}
                 >
-                  <Button variant="outline" size="sm" disabled={currentPage >= totalPages}>
+                  <Link href={pageHref(currentPage + 1)} aria-disabled={currentPage >= totalPages}>
                     Next
                     <ChevronRight className="size-4" />
-                  </Button>
-                </Link>
+                  </Link>
+                </Button>
               </div>
             </div>
           )}

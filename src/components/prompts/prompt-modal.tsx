@@ -175,7 +175,7 @@ export function PromptModal({ prompt, open, onOpenChange }: PromptModalProps) {
             <Badge className="border-0 bg-emerald-500/10 text-emerald-500">OWNED</Badge>
           )}
           {kind !== 'figma' &&
-            prompt.frameworks.map((fw) => (
+            (prompt.frameworks ?? []).map((fw) => (
               <Badge key={fw} variant="secondary" className="gap-1.5">
                 <span
                   className="size-2 rounded-full"

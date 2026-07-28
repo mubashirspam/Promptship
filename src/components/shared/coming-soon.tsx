@@ -52,9 +52,9 @@ export function ComingSoon({
 
         <div className="mt-8 flex items-center justify-center gap-3">
           <Button asChild>
-            <Link href="/prompts">
+            <Link href="/templates">
               <ArrowLeft className="size-4" />
-              Browse Prompts
+              Browse Templates
             </Link>
           </Button>
           <Button variant="outline" asChild>

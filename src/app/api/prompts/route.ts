@@ -15,8 +15,13 @@ export async function GET(request: NextRequest) {
     const assetKind = searchParams.get('assetKind');
     const query = searchParams.get('query');
     const sort = searchParams.get('sort') || 'popular';
-    const page = Number(searchParams.get('page') || '1');
-    const pageSize = Number(searchParams.get('pageSize') || '24');
+    const page = Math.max(1, Number(searchParams.get('page') || '1') || 1);
+    // Clamped so a caller can page through the full catalog (the browse grid
+    // asks for 60 at a time) without a bad ?pageSize= dumping every row.
+    const pageSize = Math.min(
+      Math.max(1, Number(searchParams.get('pageSize') || '24') || 24),
+      100
+    );
 
     const conditions = [eq(prompts.isPublished, true)];
 
@@ -75,7 +80,7 @@ export async function GET(request: NextRequest) {
       conditions.push(eq(prompts.assetKind, assetKind));
     }
 
-    const orderBy =
+    const primaryOrder =
       sort === 'newest'
         ? desc(prompts.createdAt)
         : sort === 'oldest'
@@ -83,6 +88,22 @@ export async function GET(request: NextRequest) {
           : sort === 'alphabetical'
             ? asc(prompts.title)
             : desc(prompts.usageCount);
+
+    // id breaks ties so the sort is a total order. Without it, LIMIT/OFFSET
+    // paging over columns with many equal values (seeded rows all share
+    // usageCount = 0) lets Postgres return rows in a different order per
+    // query, so pages overlap and the same template arrives twice.
+    const orderBy = [primaryOrder, asc(prompts.id)];
+
+    // Total matching the same filters, so the grid can show "X of Y" and know
+    // when to stop offering "Load more" (page length alone can't tell the
+    // difference between a full last page and a partial one).
+    const totalRow = await db()
+      .select({ count: sql<number>`count(*)::int` })
+      .from(prompts)
+      .where(and(...conditions))
+      .then((rows) => rows[0]);
+    const total = totalRow?.count ?? 0;
 
     // Fetch prompts with category name
     const results = await db()
@@ -111,7 +132,7 @@ export async function GET(request: NextRequest) {
       .from(prompts)
       .leftJoin(categories, eq(prompts.categoryId, categories.id))
       .where(and(...conditions))
-      .orderBy(orderBy)
+      .orderBy(...orderBy)
       .limit(pageSize)
       .offset((page - 1) * pageSize);
 
@@ -140,7 +161,8 @@ export async function GET(request: NextRequest) {
         items,
         page,
         pageSize,
-        hasMore: results.length === pageSize,
+        total,
+        hasMore: page * pageSize < total,
       },
     });
   } catch (error) {

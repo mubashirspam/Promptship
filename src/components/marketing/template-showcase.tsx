@@ -18,7 +18,7 @@ interface Template {
   slug: string;
   description: string;
   isFree: boolean;
-  frameworks: string[];
+  frameworks: string[] | null;
   copyCount: number;
   isFeatured: boolean;
   previewImageUrl: string | null;
@@ -212,9 +212,9 @@ export function TemplateShowcase() {
       .finally(() => setLoading(false));
   }, []);
 
-  // Homepage shows ~12 rows across 3 columns (the API already caps at 36);
-  // the button always sends people to the full catalog at /prompts.
-  const visible = data ? data.templates.slice(0, 36) : [];
+  // Every featured template, however many admin has curated — the API decides
+  // the set, this just renders it. The CTA below leads to the full catalog.
+  const visible = data ? data.templates : [];
 
   return (
     <motion.div
@@ -291,7 +291,7 @@ export function TemplateShowcase() {
                 href="/templates"
                 className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-8 py-3 text-sm font-medium text-white/70 transition-all hover:border-white/25 hover:bg-white/10 hover:text-white"
               >
-                Explore full library
+                Explore all templates
                 <ArrowRight className="size-4" />
               </Link>
             </div>
